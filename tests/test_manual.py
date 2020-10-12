@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import pytest
 
 from skydance.controller import DEFAULT_PORT, Controller
@@ -8,6 +9,11 @@ from skydance.controller import DEFAULT_PORT, Controller
 IP = "192.168.3.218"
 
 
+@pytest.mark.skipif(
+    "CI" in os.environ,
+    reason="Manual test is supposed to run against a physical controller "
+    "attached to the local network.",
+)
 @pytest.mark.asyncio
 @pytest.mark.parametrize("zone", {1, 2})
 async def test_manual_on_blink_temp_off(zone: int):
