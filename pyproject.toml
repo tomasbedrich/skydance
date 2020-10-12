@@ -1,0 +1,76 @@
+[tool.poetry]
+
+name = "skydance"
+version = "0.0"
+description = "A library for communication with Skydance lighting WiFi relay."
+
+license = "MIT"
+
+authors = ["Tomas Bedrich <ja@tbedrich.cz>"]
+
+readme = "README.md"
+
+homepage = "https://pypi.org/project/skydance"
+documentation = "https://skydance.readthedocs.io"
+repository = "https://github.com/tomasbedrich/skydance"
+
+keywords = [
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Hardware",
+    "Topic :: Home Automation",
+]
+
+[tool.poetry.dependencies]
+
+python = "^3.8"
+pytest-asyncio = "^0.14.0"
+
+
+[tool.poetry.dev-dependencies]
+
+# Formatters
+black = "=20.8b1"
+isort = "=5.5.1"
+
+# Linters
+mypy = "*"
+pydocstyle = "*"
+pylint = "~2.6.0"
+
+# Testing
+pytest = "^5.3.2"
+pytest-cov = "*"
+pytest-describe = { git = "https://github.com/pytest-dev/pytest-describe", rev = "453aa9045b265e313f356f1492d8991c02a6aea6" } # use 2.0 when released
+pytest-expecter = "^2.1"
+pytest-random = "*"
+freezegun = "*"
+
+# Reports
+coveragespace = "^3.1.1"
+
+# Documentation
+mkdocs = "~1.0"
+pygments = "^2.5.2"
+
+# Tooling
+sniffer = "*"
+MacFSEvents = { version = "*", platform = "darwin" }
+pync = { version = "*", platform = "darwin" }
+
+[tool.black]
+
+target-version = ["py36", "py37", "py38"]
+skip-string-normalization = true
+
+[build-system]
+
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
