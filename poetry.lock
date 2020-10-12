@@ -6,6 +6,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "astroid"
 version = "2.4.2"
@@ -19,6 +24,11 @@ lazy-object-proxy = ">=1.4.0,<1.5.0"
 six = ">=1.12,<2.0"
 wrapt = ">=1.11,<2.0"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "atomicwrites"
 version = "1.4.0"
@@ -26,6 +36,11 @@ description = "Atomic file writes."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "attrs"
@@ -41,6 +56,11 @@ docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
 tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "black"
 version = "20.8b1"
@@ -52,16 +72,21 @@ python-versions = ">=3.6"
 [package.dependencies]
 appdirs = "*"
 click = ">=7.1.2"
-mypy-extensions = ">=0.4.3"
+mypy_extensions = ">=0.4.3"
 pathspec = ">=0.6,<1"
 regex = ">=2020.1.8"
 toml = ">=0.10.1"
 typed-ast = ">=1.4.0"
-typing-extensions = ">=3.7.4"
+typing_extensions = ">=3.7.4"
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
 d = ["aiohttp (>=3.3.2)", "aiohttp-cors"]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "certifi"
@@ -71,6 +96,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "chardet"
 version = "3.0.4"
@@ -78,6 +108,11 @@ description = "Universal encoding detector for Python 2 and 3"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "click"
@@ -87,6 +122,11 @@ category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "colorama"
 version = "0.3.9"
@@ -94,6 +134,11 @@ description = "Cross-platform colored terminal text."
 category = "main"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "coverage"
@@ -105,6 +150,11 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
 toml = ["toml"]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "coveragespace"
@@ -121,6 +171,11 @@ docopt = ">=0.6,<0.7"
 minilog = "*"
 requests = ">=2.0,<3.0"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "docopt"
 version = "0.6.2"
@@ -128,6 +183,11 @@ description = "Pythonic argument parser, that will make you smile"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "freezegun"
@@ -140,6 +200,11 @@ python-versions = ">=3.5"
 [package.dependencies]
 python-dateutil = ">=2.7"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "idna"
 version = "2.10"
@@ -147,6 +212,24 @@ description = "Internationalized Domain Names in Applications (IDNA)"
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
+[[package]]
+name = "iniconfig"
+version = "1.0.1"
+description = "iniconfig: brain-dead simple config-ini parsing"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "isort"
@@ -157,9 +240,14 @@ optional = false
 python-versions = ">=3.6,<4.0"
 
 [package.extras]
-pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
-requirements_deprecated_finder = ["pipreqs", "pip-api"]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
+requirements_deprecated_finder = ["pip-api", "pipreqs"]
+pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "jinja2"
@@ -175,6 +263,11 @@ MarkupSafe = ">=0.23"
 [package.extras]
 i18n = ["Babel (>=0.8)"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "lazy-object-proxy"
 version = "1.4.3"
@@ -182,6 +275,11 @@ description = "A fast and thorough lazy object proxy."
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "livereload"
@@ -195,6 +293,11 @@ python-versions = "*"
 six = "*"
 tornado = {version = "*", markers = "python_version > \"2.7\""}
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "macfsevents"
 version = "0.8.1"
@@ -202,6 +305,11 @@ description = "Thread-based interface to file system observation primitives."
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "markdown"
@@ -214,6 +322,11 @@ python-versions = ">=3.6"
 [package.extras]
 testing = ["coverage", "pyyaml"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "markupsafe"
 version = "1.1.1"
@@ -221,6 +334,11 @@ description = "Safely add untrusted strings to HTML/XML markup."
 category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "mccabe"
@@ -230,6 +348,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "minilog"
 version = "2.0"
@@ -237,6 +360,11 @@ description = "Minimalistic wrapper for Python logging."
 category = "dev"
 optional = false
 python-versions = ">=3.6,<4.0"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "mkdocs"
@@ -254,13 +382,10 @@ Markdown = ">=2.3.1"
 PyYAML = ">=3.10"
 tornado = ">=5.0"
 
-[[package]]
-name = "more-itertools"
-version = "8.5.0"
-description = "More routines for operating on iterables, beyond itertools"
-category = "main"
-optional = false
-python-versions = ">=3.5"
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "mypy"
@@ -278,6 +403,11 @@ typing-extensions = ">=3.7.4"
 [package.extras]
 dmypy = ["psutil (>=4.0)"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "mypy-extensions"
 version = "0.4.3"
@@ -286,6 +416,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "nose"
 version = "1.3.7"
@@ -293,6 +428,11 @@ description = "nose extends unittest to make testing easier"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "packaging"
@@ -306,6 +446,11 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 pyparsing = ">=2.0.2"
 six = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pathspec"
 version = "0.8.0"
@@ -313,6 +458,11 @@ description = "Utility library for gitignore style pattern matching of file path
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pluggy"
@@ -325,6 +475,11 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 [package.extras]
 dev = ["pre-commit", "tox"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "py"
 version = "1.9.0"
@@ -332,6 +487,11 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pydocstyle"
@@ -344,6 +504,11 @@ python-versions = ">=3.5"
 [package.dependencies]
 snowballstemmer = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pygments"
 version = "2.7.1"
@@ -351,6 +516,11 @@ description = "Pygments is a syntax highlighting package written in Python."
 category = "dev"
 optional = false
 python-versions = ">=3.5"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pylint"
@@ -367,6 +537,11 @@ isort = ">=4.2.5,<6"
 mccabe = ">=0.6,<0.7"
 toml = ">=0.7.1"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pync"
 version = "2.0.3"
@@ -378,6 +553,11 @@ python-versions = "*"
 [package.dependencies]
 python-dateutil = ">=2.0"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pyparsing"
 version = "2.4.7"
@@ -386,9 +566,14 @@ category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pytest"
-version = "5.4.3"
+version = "6.1.1"
 description = "pytest: simple powerful testing with Python"
 category = "main"
 optional = false
@@ -398,15 +583,20 @@ python-versions = ">=3.5"
 atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
 attrs = ">=17.4.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
-more-itertools = ">=4.0.0"
+iniconfig = "*"
 packaging = "*"
 pluggy = ">=0.12,<1.0"
-py = ">=1.5.0"
-wcwidth = "*"
+py = ">=1.8.2"
+toml = "*"
 
 [package.extras]
-checkqa-mypy = ["mypy (v0.761)"]
+checkqa_mypy = ["mypy (0.780)"]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pytest-asyncio"
@@ -422,6 +612,11 @@ pytest = ">=5.4.0"
 [package.extras]
 testing = ["async-generator (>=1.3)", "coverage", "hypothesis (>=5.7.1)"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pytest-cov"
 version = "2.10.1"
@@ -436,6 +631,11 @@ pytest = ">=4.6"
 
 [package.extras]
 testing = ["fields", "hunter", "process-tests (2.0.2)", "six", "pytest-xdist", "virtualenv"]
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pytest-describe"
@@ -462,6 +662,11 @@ category = "dev"
 optional = false
 python-versions = ">=3.6,<4.0"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "pytest-random"
 version = "0.02"
@@ -472,6 +677,11 @@ python-versions = "*"
 
 [package.dependencies]
 pytest = ">=2.2.3"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "python-dateutil"
@@ -484,6 +694,11 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 [package.dependencies]
 six = ">=1.5"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "python-termstyle"
 version = "0.1.10"
@@ -491,6 +706,11 @@ description = "console colouring for python"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "pyyaml"
@@ -500,6 +720,11 @@ category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "regex"
 version = "2020.10.11"
@@ -507,6 +732,11 @@ description = "Alternative regular expression module, to replace re."
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "requests"
@@ -526,6 +756,11 @@ urllib3 = ">=1.21.1,<1.25.0 || >1.25.0,<1.25.1 || >1.25.1,<1.26"
 security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "six"
 version = "1.15.0"
@@ -533,6 +768,11 @@ description = "Python 2 and 3 compatibility utilities"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "sniffer"
@@ -553,6 +793,11 @@ libnotify = ["py-notify (0.3.1)"]
 linux = ["pyinotify (0.9.0)"]
 osx = ["MacFSEvents (0.2.8)"]
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "snowballstemmer"
 version = "2.0.0"
@@ -561,13 +806,23 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "toml"
 version = "0.10.1"
 description = "Python Library for Tom's Obvious, Minimal Language"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "tornado"
@@ -577,6 +832,11 @@ category = "dev"
 optional = false
 python-versions = ">= 3.5"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "typed-ast"
 version = "1.4.1"
@@ -585,6 +845,11 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [[package]]
 name = "typing-extensions"
 version = "3.7.4.3"
@@ -592,6 +857,11 @@ description = "Backported and Experimental Type Hints for Python 3.5+"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "urllib3"
@@ -606,13 +876,10 @@ brotli = ["brotlipy (>=0.6.0)"]
 secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "pyOpenSSL (>=0.14)", "ipaddress"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
-[[package]]
-name = "wcwidth"
-version = "0.2.5"
-description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
-optional = false
-python-versions = "*"
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
 
 [[package]]
 name = "wrapt"
@@ -622,10 +889,15 @@ category = "dev"
 optional = false
 python-versions = "*"
 
+[package.source]
+type = "legacy"
+url = "https://pypi.python.org/simple"
+reference = "6b43"
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0ffd807026b5f080af5637b84d71e0774c09d7455379d13062d90e0e44a03f9c"
+content-hash = "ff205b0d652de635c6fe8e02946067dd1fcf0e0a8eca0e6bb928c599fa20c57b"
 
 [metadata.files]
 appdirs = [
@@ -713,6 +985,10 @@ freezegun = [
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
     {file = "idna-2.10.tar.gz", hash = "sha256:b307872f855b18632ce0c21c5e45be78c0ea7ae4c15c828c20788b26921eb3f6"},
+]
+iniconfig = [
+    {file = "iniconfig-1.0.1-py3-none-any.whl", hash = "sha256:80cf40c597eb564e86346103f609d74efce0f6b4d4f30ec8ce9e2c26411ba437"},
+    {file = "iniconfig-1.0.1.tar.gz", hash = "sha256:e5f92f89355a67de0595932a6c6c02ab4afddc6fcdc0bfc5becd0d60884d3f69"},
 ]
 isort = [
     {file = "isort-5.5.1-py3-none-any.whl", hash = "sha256:a200d47b7ee8b7f7d0a9646650160c4a51b6a91a9413fd31b1da2c4de789f5d3"},
@@ -802,10 +1078,6 @@ mkdocs = [
     {file = "mkdocs-1.0.4-py2.py3-none-any.whl", hash = "sha256:8cc8b38325456b9e942c981a209eaeb1e9f3f77b493ad755bfef889b9c8d356a"},
     {file = "mkdocs-1.0.4.tar.gz", hash = "sha256:17d34329aad75d5de604b9ed4e31df3a4d235afefdc46ce7b1964fddb2e1e939"},
 ]
-more-itertools = [
-    {file = "more-itertools-8.5.0.tar.gz", hash = "sha256:6f83822ae94818eae2612063a5101a7311e68ae8002005b5e05f03fd74a86a20"},
-    {file = "more_itertools-8.5.0-py3-none-any.whl", hash = "sha256:9b30f12df9393f0d28af9210ff8efe48d10c94f73e5daf886f10c4b0b0b4f03c"},
-]
 mypy = [
     {file = "mypy-0.790-cp35-cp35m-macosx_10_6_x86_64.whl", hash = "sha256:bd03b3cf666bff8d710d633d1c56ab7facbdc204d567715cb3b9f85c6e94f669"},
     {file = "mypy-0.790-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:2170492030f6faa537647d29945786d297e4862765f0b4ac5930ff62e300d802"},
@@ -867,8 +1139,8 @@ pyparsing = [
     {file = "pyparsing-2.4.7.tar.gz", hash = "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"},
 ]
 pytest = [
-    {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},
-    {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
+    {file = "pytest-6.1.1-py3-none-any.whl", hash = "sha256:7a8190790c17d79a11f847fba0b004ee9a8122582ebff4729a082c109e81a4c9"},
+    {file = "pytest-6.1.1.tar.gz", hash = "sha256:8f593023c1a0f916110285b6efd7f99db07d59546e3d8c36fc60e2ab05d3be92"},
 ]
 pytest-asyncio = [
     {file = "pytest-asyncio-0.14.0.tar.gz", hash = "sha256:9882c0c6b24429449f5f969a5158b528f39bde47dc32e85b9f0403965017e700"},
@@ -892,7 +1164,6 @@ python-dateutil = [
 ]
 python-termstyle = [
     {file = "python-termstyle-0.1.10.tar.gz", hash = "sha256:f42a6bb16fbfc5e2c66d553e7ad46524ea833872f75ee5d827c15115fafc94e2"},
-    {file = "python-termstyle-0.1.10.tgz", hash = "sha256:6faf42ba42f2826c38cf70dacb3ac51f248a418e48afc0e36593df11cf3ab1d2"},
 ]
 pyyaml = [
     {file = "PyYAML-5.3.1-cp27-cp27m-win32.whl", hash = "sha256:74809a57b329d6cc0fdccee6318f44b9b8649961fa73144a98735b0aaf029f1f"},
@@ -998,10 +1269,6 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.25.10-py2.py3-none-any.whl", hash = "sha256:e7983572181f5e1522d9c98453462384ee92a0be7fac5f1413a1e35c56cc0461"},
     {file = "urllib3-1.25.10.tar.gz", hash = "sha256:91056c15fa70756691db97756772bb1eb9678fa585d9184f24534b100dc60f4a"},
-]
-wcwidth = [
-    {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
-    {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
