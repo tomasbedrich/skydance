@@ -21,6 +21,9 @@ async def test_manual_on_blink_temp_off(zone: int):
     reader, writer = await asyncio.open_connection(IP, DEFAULT_PORT)
     controller = Controller(reader, writer)
 
+    print("Pinging")
+    await controller.ping()
+
     print("Powering on")
     await controller.power_zone(zone, True)
     await asyncio.sleep(2)

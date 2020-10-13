@@ -16,6 +16,14 @@ def controller():
 
 
 @pytest.mark.asyncio
+async def test_ping(controller):
+    await controller.ping()
+    controller.writer.write.assert_called_once_with(
+        bytes.fromhex("55aa5aa57e00800080e18000000100790000007e")
+    )
+
+
+@pytest.mark.asyncio
 async def test_power_on_zone(controller):
     await controller.power_zone(2, True)
     controller.writer.write.assert_called_once_with(
