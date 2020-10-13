@@ -51,10 +51,10 @@ class Controller:
         log.debug("Received: %s", res.hex(' '))
         return res
 
-    # async def ping(self):
-    #     """Ping controller to raise a communication error if something is wrong."""
-    #     await self.load_id()
-    #
+    async def ping(self):
+        """Ping controller to raise a communication error if something is wrong."""
+        await self._write(HEAD, self.frame_number, "80 00 80 e1 80 00 00 01 00 79 00 00", TAIL)
+
     # async def load_id(self):
     #     """Get controller ID for following communication."""
     #     log.debug("Getting controller ID")
