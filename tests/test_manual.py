@@ -3,10 +3,14 @@ import logging
 import os
 import pytest
 
-from skydance.controller import DEFAULT_PORT, Controller
+from skydance.commands import *
+from skydance.controller import Controller
+from skydance.session import Session
 
 
 IP = "192.168.3.218"
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(
@@ -17,36 +21,31 @@ IP = "192.168.3.218"
 @pytest.mark.asyncio
 @pytest.mark.parametrize("zone", {1, 2})
 async def test_manual_on_blink_temp_off(zone: int):
-    print("Opening connection")
-    reader, writer = await asyncio.open_connection(IP, DEFAULT_PORT)
-    controller = Controller(reader, writer)
+    async with Session(IP) as sess:
+        controller = Controller(sess)
 
-    print("Pinging")
-    await controller.ping()
+        log.info("Pinging")
+        await controller.write(PingCommand())
 
-    print("Powering on")
-    await controller.power_zone(zone, True)
-    await asyncio.sleep(2)
+        log.info("Powering on")
+        await controller.write(PowerOnCommand(zone=zone))
+        await asyncio.sleep(2)
 
-    print("Starting blink sequence")
-    await controller.dim_zone(zone, 1)
-    await asyncio.sleep(0.5)
-    await controller.dim_zone(zone, 255)
-    await asyncio.sleep(2)
+        log.info("Starting blink sequence")
+        await controller.write(BrightnessCommand(zone=zone, brightness=1))
+        await asyncio.sleep(0.5)
+        await controller.write(BrightnessCommand(zone=zone, brightness=255))
+        await asyncio.sleep(2)
 
-    print("Starting color temperature change sequence")
-    await controller.temp_zone(zone, 255)
-    await asyncio.sleep(0.5)
-    await controller.temp_zone(zone, 0)
-    await asyncio.sleep(2)
+        log.info("Starting white temperature change sequence")
+        await controller.write(TemperatureCommand(zone=zone, temperature=255))
+        await asyncio.sleep(0.5)
+        await controller.write(TemperatureCommand(zone=zone, temperature=0))
+        await asyncio.sleep(2)
 
-    print("Powering off")
-    await controller.power_zone(zone, False)
-    # note - zone max+1 means controlling all zones at once
-
-    print("Closing connection")
-    writer.close()
-    await writer.wait_closed()
+        log.info("Powering off")
+        await controller.write(PowerOffCommand(zone=zone))
+        # note - zone max+1 means controlling all zones at once
 
 
 if __name__ == '__main__':
