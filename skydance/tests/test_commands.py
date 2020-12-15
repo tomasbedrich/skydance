@@ -26,6 +26,14 @@ def test_power_off():
     assert bytes.fromhex("800080e180000002000a010000") == PowerOffCommand(zone=2).bytes
 
 
+def test_master_power_on():
+    assert bytes.fromhex("800080e18000000fff0b0300030001") == MasterPowerOnCommand().bytes
+
+
+def test_master_power_off():
+    assert bytes.fromhex("800080e18000000fff0b0300000000") == MasterPowerOffCommand().bytes
+
+
 def test_brightness_min():
     assert (
         bytes.fromhex("800080e180000002000702000001")
