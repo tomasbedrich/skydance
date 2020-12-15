@@ -67,13 +67,40 @@ class PowerCommand(ZoneCommand):
                 _MAGIC,
                 struct.pack("B", self.zone),
                 bytes().fromhex("00 0a 01 00"),
-                struct.pack("B", 1 if self.state else 0),
+                bytes().fromhex("01" if self.state else "00"),
             )
         )
 
 
 PowerOnCommand = partial(PowerCommand, state=True)
 PowerOffCommand = partial(PowerCommand, state=False)
+
+
+class MasterPowerCommand(Command):
+    """Power all zones on/off."""
+
+    state: bool
+    """A power on/off state."""
+
+    def __init__(self, *, state, **kwargs):
+        self.state = state
+        super().__init__(**kwargs)
+
+    @property
+    def bytes(self) -> bytes:
+        return bytes().join(
+            (
+                _MAGIC,
+                bytes().fromhex("0F FF 0B 03 00"),
+                bytes().fromhex("03" if self.state else "00"),
+                bytes().fromhex("00"),
+                bytes().fromhex("01" if self.state else "00"),
+            )
+        )
+
+
+MasterPowerOnCommand = partial(MasterPowerCommand, state=True)
+MasterPowerOffCommand = partial(MasterPowerCommand, state=False)
 
 
 class BrightnessCommand(ZoneCommand):
@@ -165,10 +192,3 @@ class TemperatureCommand(ZoneCommand):
 #         log.info(f"Found device: {device_code.hex(' ')}, name: {device_name}")
 #         yield device_code
 #         i, n = i + 1, 2 ** i
-#
-# async def master_on(self):
-#     # FIXME
-#     log.debug("Setting master ON")
-#     res = await self._write(HEAD, self.frame_number, self.id, "0F FF 0B",
-#           "03 00 00 00", "01", TAIL)
-#     print(res)

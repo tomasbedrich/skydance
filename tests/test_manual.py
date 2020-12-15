@@ -27,6 +27,14 @@ async def test_manual_on_blink_temp_off(zone: int):
         log.info("Pinging")
         await controller.write(PingCommand())
 
+        log.info("Master on")
+        await controller.write(MasterPowerOnCommand())
+        await asyncio.sleep(2)
+
+        log.info("Master off")
+        await controller.write(MasterPowerOffCommand())
+        await asyncio.sleep(2)
+
         log.info("Powering on")
         await controller.write(PowerOnCommand(zone=zone))
         await asyncio.sleep(2)
