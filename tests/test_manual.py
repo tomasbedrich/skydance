@@ -8,24 +8,47 @@ from skydance.controller import Controller
 from skydance.session import Session
 
 
+pytestmark = pytest.mark.skipif(
+    "CI" in os.environ,
+    reason="Manual test is supposed to run against a physical controller "
+    "attached to the local network.",
+)
+
 IP = "192.168.3.218"
 
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(
-    "CI" in os.environ,
-    reason="Manual test is supposed to run against a physical controller "
-    "attached to the local network.",
-)
 @pytest.mark.asyncio
-@pytest.mark.parametrize("zone", {1, 2})
-async def test_manual_on_blink_temp_off(zone: int):
+async def test_zone_discovery():
+    async with Session(IP) as sess:
+        controller = Controller(sess)
+
+        log.info(f"Getting number of zones")
+        await controller.write(GetNumberOfZonesCommand())
+        number_of_zones = GetNumberOfZonesResponse(await controller.read()).number
+
+        for zone in range(1, number_of_zones + 1):
+            log.info(f"Getting name of {zone=}")
+            await controller.write(GetZoneNameCommand(zone=zone))
+            zone_name = GetZoneNameResponse(await controller.read()).name
+            log.info(f"Found zone with name: {zone_name}")
+
+
+@pytest.mark.asyncio
+async def test_ping():
     async with Session(IP) as sess:
         controller = Controller(sess)
 
         log.info("Pinging")
         await controller.write(PingCommand())
+        await asyncio.sleep(2)
+
+
+@pytest.mark.asyncio
+async def test_master_on_off():
+    async with Session(IP) as sess:
+        controller = Controller(sess)
 
         log.info("Master on")
         await controller.write(MasterPowerOnCommand())
@@ -34,6 +57,13 @@ async def test_manual_on_blink_temp_off(zone: int):
         log.info("Master off")
         await controller.write(MasterPowerOffCommand())
         await asyncio.sleep(2)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("zone", {1, 2})
+async def test_on_blink_temp_off(zone: int):
+    async with Session(IP) as sess:
+        controller = Controller(sess)
 
         log.info("Powering on")
         await controller.write(PowerOnCommand(zone=zone))
@@ -58,4 +88,4 @@ async def test_manual_on_blink_temp_off(zone: int):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    asyncio.run(test_manual_on_blink_temp_off(zone=2))
+    asyncio.run(test_zone_discovery())

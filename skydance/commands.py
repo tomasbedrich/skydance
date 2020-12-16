@@ -167,28 +167,82 @@ class TemperatureCommand(ZoneCommand):
         )
 
 
-# Some partial implementations from old version follows:
+class GetNumberOfZonesCommand(Command):
+    """Get number of zones available."""
 
-# async def load_id(self):
-#     """Get controller ID for following communication."""
-#     log.debug("Getting controller ID")
-#     device_type = "80"
-#     res = await self._write(HEAD, self.frame_number, device_type,
-#           "00 80 e1 80 00 00 01 00 79 00 00", TAIL)
-#     self.id = res[11:13] # really?
-#     log.info(f"Got controller ID: {self.id.hex(' ')}")
-#     # actual ID according to app is: 98D863A59E5C
-#
-# async def find_devices(self):
-#     log.debug("Finding devices")
-#     i, n = 1, 1
-#     while True:
-#         res = await self._write(HEAD, self.frame_number, "c00c800100", self.id,
-#               struct.pack("B", n), "007301", struct.pack(">H", i), TAIL)
-#         if res[22:24] == bytes([0, 0]):
-#             break
-#         device_code = res[22:24] + res[12:14]
-#         device_name = res[26:41].decode("ascii")
-#         log.info(f"Found device: {device_code.hex(' ')}, name: {device_name}")
-#         yield device_code
-#         i, n = i + 1, 2 ** i
+    @property
+    def bytes(self) -> bytes:
+        return bytes().join(
+            (
+                _MAGIC,
+                bytes().fromhex("01 00 79 00 00"),
+            )
+        )
+
+
+class GetZoneNameCommand(ZoneCommand):
+    """Discover a zone according to it's number."""
+
+    @property
+    def bytes(self) -> bytes:
+        return bytes().join(
+            (
+                _MAGIC,
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes().fromhex("78 00 00"),
+            )
+        )
+
+    @staticmethod
+    def validate_zone(zone: int):
+        """Raise ValueError if zone number is invalid or outside of range defined by a SkyDance app."""
+        try:
+            if not 1 <= zone <= 16:
+                raise ValueError("Zone number must be between 1 and 16.")
+        except TypeError as e:
+            raise ValueError("Zone number must be int-like.") from e
+
+
+class Response(metaclass=ABCMeta):
+    """A base response."""
+
+    raw: bytes
+    """
+    Raw bytes received as a response.
+    
+    It must exclude HEAD, frame number and TAIL.
+    These are removed automatically in ``Controller``.
+    """
+
+    def __init__(self, raw: bytes):
+        self.raw = raw
+
+
+class GetNumberOfZonesResponse(Response):
+    """Parse a response for ``GetNumberOfZonesCommand``."""
+
+    # The packets looks like:
+    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 90 00 7e - 16 zones
+    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 00 00 7e - 15 zones
+    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 00 00 00 7e - 14 zones
+    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 00 00 00 00 7e - 13 zones
+
+    # We can see a clear pattern at the end.
+    # It is experimentally proven that the pattern doesn't depend on:
+    # - Zone type (dimmer, CCT, RGB, ...)
+    # - Zone name
+    # - Zone status (on/off)
+
+    @property
+    def number(self):
+        return sum(1 for zone in self.raw[12:28] if zone != 0)
+
+
+class GetZoneNameResponse(Response):
+    """Parse a response for ``DiscoverZoneCommand``."""
+
+    # Name offset experimentally decoded from response packets.
+
+    @property
+    def name(self) -> str:
+        return self.raw[14:].decode("ascii", errors="replace").strip()
