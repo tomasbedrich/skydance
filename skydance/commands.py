@@ -82,9 +82,8 @@ class MasterPowerCommand(Command):
     state: bool
     """A power on/off state."""
 
-    def __init__(self, *, state, **kwargs):
+    def __init__(self, *, state):
         self.state = state
-        super().__init__(**kwargs)
 
     @property
     def bytes(self) -> bytes:
@@ -195,7 +194,12 @@ class GetZoneNameCommand(ZoneCommand):
 
     @staticmethod
     def validate_zone(zone: int):
-        """Raise ValueError if zone number is invalid or outside of range defined by a SkyDance app."""
+        """
+        Raise ValueError if zone number is invalid.
+
+        It may be invalid either because it is not a number
+        or it may be outside of range defined by a SkyDance app.
+        """
         try:
             if not 1 <= zone <= 16:
                 raise ValueError("Zone number must be between 1 and 16.")
@@ -209,7 +213,7 @@ class Response(metaclass=ABCMeta):
     raw: bytes
     """
     Raw bytes received as a response.
-    
+
     It must exclude HEAD, frame number and TAIL.
     These are removed automatically in ``Controller``.
     """
@@ -222,10 +226,10 @@ class GetNumberOfZonesResponse(Response):
     """Parse a response for ``GetNumberOfZonesCommand``."""
 
     # The packets looks like:
-    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 90 00 7e - 16 zones
-    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 00 00 7e - 15 zones
-    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 00 00 00 7e - 14 zones
-    # 55 aa 5a a5 7e 00 80 00 80 e1 80 26 51 01 00 f9 10 00 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 00 00 00 00 7e - 13 zones
+    # ... omitted ... 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 90 00 7e - 16 zones
+    # ... omitted ... 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 00 00 7e - 15 zones
+    # ... omitted ... 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 00 00 00 7e - 14 zones
+    # ... omitted ... 83 84 85 86 87 88 89 8a 8b 8c 8d 00 00 00 00 7e - 13 zones
 
     # We can see a clear pattern at the end.
     # It is experimentally proven that the pattern doesn't depend on:

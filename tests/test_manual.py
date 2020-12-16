@@ -24,15 +24,15 @@ async def test_zone_discovery():
     async with Session(IP) as sess:
         controller = Controller(sess)
 
-        log.info(f"Getting number of zones")
+        log.info("Getting number of zones")
         await controller.write(GetNumberOfZonesCommand())
         number_of_zones = GetNumberOfZonesResponse(await controller.read()).number
 
         for zone in range(1, number_of_zones + 1):
-            log.info(f"Getting name of {zone=}")
+            log.info("Getting name of zone=%d", zone)
             await controller.write(GetZoneNameCommand(zone=zone))
             zone_name = GetZoneNameResponse(await controller.read()).name
-            log.info(f"Found zone with name: {zone_name}")
+            log.info("Zone=%d has name=%s", zone, zone_name)
 
 
 @pytest.mark.asyncio

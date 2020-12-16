@@ -28,5 +28,5 @@ class Controller:
     async def read(self):
         res = await self.session.readuntil(TAIL)
         # strip HEAD, frame number and TAIL
-        res = res[len(HEAD) + 1:-len(TAIL)]
+        res = res[len(HEAD) + 1 : -len(TAIL)]
         return res
