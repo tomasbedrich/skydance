@@ -82,3 +82,57 @@ def test_temperature_max():
 def test_temperature_invalid(temperature):
     with pytest.raises(expected_exception=ValueError):
         TemperatureCommand.validate_temperature(temperature)
+
+
+def test_get_number_of_zones():
+    assert bytes.fromhex("800080e18000000100790000") == GetNumberOfZonesCommand().bytes
+
+
+@pytest.mark.parametrize(
+    "response, num",
+    [
+        (bytes.fromhex("800080e18026510100f910008182838485868788898a8b8c8d8e8f90"), 16),
+        (bytes.fromhex("800080e18026510100f9100081828384858687880000000000000000"), 8),
+        (bytes.fromhex("800080e18026510100f9100000000000000000000000000000000000"), 0),
+    ],
+)
+def test_get_number_of_zones_response(response, num):
+    assert num == GetNumberOfZonesResponse(response).number
+
+
+@pytest.mark.parametrize(
+    "zone",
+    range(1, 17),
+)
+def test_get_zone_name(zone: int):
+    res = GetZoneNameCommand(zone=zone).bytes
+    zone_encoded = 2 ** (zone - 1)
+    expected = bytes().join(
+        (
+            bytes().fromhex("80 00 80 e1 80 00 00"),
+            struct.pack("<H", zone_encoded),
+            bytes().fromhex("78 00 00"),
+        )
+    )
+    assert expected == res
+
+
+@pytest.mark.parametrize(
+    "zone",
+    [17, 256, 0, -1, 99999999999, "foo", None],
+)
+def test_get_zone_name_invalid(zone: int):
+    with pytest.raises(expected_exception=ValueError):
+        GetZoneNameCommand.validate_zone(zone)
+
+
+@pytest.mark.parametrize(
+    "variant",
+    [
+        bytes.fromhex("800080e18026514000f8100051005a6f6e65205247422b4343540000"),
+        bytes.fromhex("800080e18026514000f8100051005a6f6e65205247422b4343542000"),
+        bytes.fromhex("800080e18026514000f8100051005a6f6e65205247422b4343542020"),
+    ],
+)
+def test_get_zone_name_response(variant):
+    assert "Zone RGB+CCT" == GetZoneNameResponse(variant).name
