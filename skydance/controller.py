@@ -26,4 +26,7 @@ class Controller:
         self._increment_frame_number()
 
     async def read(self):
-        return await self.session.readuntil(TAIL)
+        res = await self.session.readuntil(TAIL)
+        # strip HEAD, frame number and TAIL
+        res = res[len(HEAD) + 1:-len(TAIL)]
+        return res
