@@ -19,7 +19,7 @@ class Controller:
         self.frame_number = bytearray.fromhex("00")
 
     async def write(self, command: Command):
-        req = bytes().join((HEAD, self.frame_number, command.bytes, TAIL))
+        req = bytes().join((HEAD, self.frame_number, command.body, TAIL))
 
         # TODO retry mechanism
         await self.session.write(req)

@@ -15,7 +15,7 @@ class Command(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         """
         Return bytes which represents this command.
 
@@ -27,7 +27,7 @@ class Command(metaclass=ABCMeta):
 class PingCommand(Command):
     """Ping controller to raise a communication error if something is wrong."""
 
-    bytes = bytes.fromhex("80 00 80 e1 80 00 00 01 00 79 00 00")
+    body = bytes.fromhex("80 00 80 e1 80 00 00 01 00 79 00 00")
 
 
 class ZoneCommand(Command, metaclass=ABCMeta):
@@ -61,7 +61,7 @@ class PowerCommand(ZoneCommand):
         super().__init__(**kwargs)
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
@@ -86,7 +86,7 @@ class MasterPowerCommand(Command):
         self.state = state
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
@@ -123,7 +123,7 @@ class BrightnessCommand(ZoneCommand):
             raise ValueError("Brightness level must be int-like.") from e
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
@@ -155,7 +155,7 @@ class TemperatureCommand(ZoneCommand):
             raise ValueError("Temperature level must be int-like.") from e
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
@@ -170,7 +170,7 @@ class GetNumberOfZonesCommand(Command):
     """Get number of zones available."""
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
@@ -183,7 +183,7 @@ class GetZoneNameCommand(ZoneCommand):
     """Discover a zone according to it's number."""
 
     @property
-    def bytes(self) -> bytes:
+    def body(self) -> bytes:
         return bytes().join(
             (
                 _MAGIC,
