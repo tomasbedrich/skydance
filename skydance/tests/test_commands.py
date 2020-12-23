@@ -6,7 +6,7 @@ from skydance.commands import *
 
 
 def test_ping():
-    assert PingCommand().bytes == bytes.fromhex("800080e18000000100790000")
+    assert PingCommand().body == bytes.fromhex("800080e18000000100790000")
 
 
 @pytest.mark.parametrize(
@@ -19,33 +19,33 @@ def test_zone_invalid(zone):
 
 
 def test_power_on():
-    assert PowerOnCommand(zone=2).bytes == bytes.fromhex("800080e180000002000a010001")
+    assert PowerOnCommand(zone=2).body == bytes.fromhex("800080e180000002000a010001")
 
 
 def test_power_off():
-    assert PowerOffCommand(zone=2).bytes == bytes.fromhex("800080e180000002000a010000")
+    assert PowerOffCommand(zone=2).body == bytes.fromhex("800080e180000002000a010000")
 
 
 def test_master_power_on():
-    assert MasterPowerOnCommand().bytes == bytes.fromhex(
+    assert MasterPowerOnCommand().body == bytes.fromhex(
         "800080e18000000fff0b0300030001"
     )
 
 
 def test_master_power_off():
-    assert MasterPowerOffCommand().bytes == bytes.fromhex(
+    assert MasterPowerOffCommand().body == bytes.fromhex(
         "800080e18000000fff0b0300000000"
     )
 
 
 def test_brightness_min():
-    assert BrightnessCommand(zone=2, brightness=1).bytes == bytes.fromhex(
+    assert BrightnessCommand(zone=2, brightness=1).body == bytes.fromhex(
         "800080e180000002000702000001"
     )
 
 
 def test_brightness_max():
-    assert BrightnessCommand(zone=2, brightness=255).bytes == bytes.fromhex(
+    assert BrightnessCommand(zone=2, brightness=255).body == bytes.fromhex(
         "800080e1800000020007020000ff"
     )
 
@@ -60,13 +60,13 @@ def test_brightness_invalid(brightness):
 
 
 def test_temperature_min():
-    assert TemperatureCommand(zone=2, temperature=0).bytes == bytes.fromhex(
+    assert TemperatureCommand(zone=2, temperature=0).body == bytes.fromhex(
         "800080e180000002000d02000000"
     )
 
 
 def test_temperature_max():
-    assert TemperatureCommand(zone=2, temperature=255).bytes == bytes.fromhex(
+    assert TemperatureCommand(zone=2, temperature=255).body == bytes.fromhex(
         "800080e180000002000d020000ff"
     )
 
@@ -81,7 +81,7 @@ def test_temperature_invalid(temperature):
 
 
 def test_get_number_of_zones():
-    assert GetNumberOfZonesCommand().bytes == bytes.fromhex("800080e18000000100790000")
+    assert GetNumberOfZonesCommand().body == bytes.fromhex("800080e18000000100790000")
 
 
 @pytest.mark.parametrize(
@@ -101,7 +101,7 @@ def test_get_number_of_zones_response(response, num):
     range(1, 17),
 )
 def test_get_zone_name(zone: int):
-    res = GetZoneNameCommand(zone=zone).bytes
+    res = GetZoneNameCommand(zone=zone).body
     zone_encoded = 2 ** (zone - 1)
     expected = bytes().join(
         (
