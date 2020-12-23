@@ -3,24 +3,56 @@ from abc import ABCMeta, abstractmethod
 from functools import partial
 
 
+PORT = 8899
+
+HEAD = bytes.fromhex("55 aa 5a a5 7e")
+TAIL = bytes.fromhex("00 7e")
+
 # This is repeated through many commands, don't know why yet.
 # It probably has something to do with a Controller ID.
 # But as reported by other users, it is working with hardcoded ID as well.
 # See: https://github.com/tomasbedrich/home-assistant-skydance/issues/1
-_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
+_COMMAND_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
+
+
+class State:
+    """Holds state of a connection."""
+
+    _frame_number: int
+
+    def __init__(self):
+        self._frame_number = 0
+
+    def increment_frame_number(self):
+        self._frame_number = (self._frame_number + 1) % 256
+
+    @property
+    def frame_number(self) -> bytes:
+        return bytes([self._frame_number])
 
 
 class Command(metaclass=ABCMeta):
     """A base command."""
 
+    state: State
+    """A state of connection used to generate byte output of a command."""
+
+    def __init__(self, state: State):
+        self.state = state
+
+    @property
+    def raw(self):
+        """Return complete byte output of a command ready to send over network."""
+        return bytes().join((HEAD, self.state.frame_number, self.body, TAIL))
+
     @property
     @abstractmethod
     def body(self) -> bytes:
         """
-        Return bytes which represents this command.
+        Return byte body which represents the command core.
 
         The returned value must exclude HEAD, frame number and TAIL.
-        These are added automatically in ``Controller``.
+        These are added automatically in ``Command.bytes``.
         """
 
 
@@ -36,7 +68,8 @@ class ZoneCommand(Command, metaclass=ABCMeta):
     zone: int
     """A zone number to control."""
 
-    def __init__(self, *, zone):
+    def __init__(self, *args, zone, **kwargs):
+        super().__init__(*args, **kwargs)
         self.validate_zone(zone)
         self.zone = zone
 
@@ -53,53 +86,54 @@ class ZoneCommand(Command, metaclass=ABCMeta):
 class PowerCommand(ZoneCommand):
     """Power a Zone on/off."""
 
-    state: bool
+    power: bool
     """A power on/off state."""
 
-    def __init__(self, *, state, **kwargs):
-        self.state = state
-        super().__init__(**kwargs)
+    def __init__(self, *args, power, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.power = power
 
     @property
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
+                _COMMAND_MAGIC,
                 struct.pack("B", self.zone),
-                bytes().fromhex("00 0a 01 00"),
-                bytes().fromhex("01" if self.state else "00"),
+                bytes.fromhex("00 0a 01 00"),
+                bytes.fromhex("01" if self.power else "00"),
             )
         )
 
 
-PowerOnCommand = partial(PowerCommand, state=True)
-PowerOffCommand = partial(PowerCommand, state=False)
+PowerOnCommand = partial(PowerCommand, power=True)
+PowerOffCommand = partial(PowerCommand, power=False)
 
 
 class MasterPowerCommand(Command):
     """Power all zones on/off."""
 
-    state: bool
+    power: bool
     """A power on/off state."""
 
-    def __init__(self, *, state):
-        self.state = state
+    def __init__(self, *args, power, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.power = power
 
     @property
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
-                bytes().fromhex("0F FF 0B 03 00"),
-                bytes().fromhex("03" if self.state else "00"),
-                bytes().fromhex("00"),
-                bytes().fromhex("01" if self.state else "00"),
+                _COMMAND_MAGIC,
+                bytes.fromhex("0F FF 0B 03 00"),
+                bytes.fromhex("03" if self.power else "00"),
+                bytes.fromhex("00"),
+                bytes.fromhex("01" if self.power else "00"),
             )
         )
 
 
-MasterPowerOnCommand = partial(MasterPowerCommand, state=True)
-MasterPowerOffCommand = partial(MasterPowerCommand, state=False)
+MasterPowerOnCommand = partial(MasterPowerCommand, power=True)
+MasterPowerOffCommand = partial(MasterPowerCommand, power=False)
 
 
 class BrightnessCommand(ZoneCommand):
@@ -108,10 +142,10 @@ class BrightnessCommand(ZoneCommand):
     brightness: int
     """A brightness level between 1-255 (higher = more bright)."""
 
-    def __init__(self, *, brightness, **kwargs):
+    def __init__(self, *args, brightness, **kwargs):
+        super().__init__(*args, **kwargs)
         self.validate_brightness(brightness)
         self.brightness = brightness
-        super().__init__(**kwargs)
 
     @staticmethod
     def validate_brightness(brightness: int):
@@ -126,9 +160,9 @@ class BrightnessCommand(ZoneCommand):
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
+                _COMMAND_MAGIC,
                 struct.pack("B", self.zone),
-                bytes().fromhex("00 07 02 00 00"),
+                bytes.fromhex("00 07 02 00 00"),
                 struct.pack("B", self.brightness),
             )
         )
@@ -140,10 +174,10 @@ class TemperatureCommand(ZoneCommand):
     temperature: int
     """A temperature level between 0-255 (higher = more cold)."""
 
-    def __init__(self, *, temperature, **kwargs):
+    def __init__(self, *args, temperature, **kwargs):
+        super().__init__(*args, **kwargs)
         self.validate_temperature(temperature)
         self.temperature = temperature
-        super().__init__(**kwargs)
 
     @staticmethod
     def validate_temperature(temperature: int):
@@ -158,9 +192,9 @@ class TemperatureCommand(ZoneCommand):
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
+                _COMMAND_MAGIC,
                 struct.pack("B", self.zone),
-                bytes().fromhex("00 0D 02 00 00"),
+                bytes.fromhex("00 0D 02 00 00"),
                 struct.pack("B", self.temperature),
             )
         )
@@ -173,8 +207,8 @@ class GetNumberOfZonesCommand(Command):
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
-                bytes().fromhex("01 00 79 00 00"),
+                _COMMAND_MAGIC,
+                bytes.fromhex("01 00 79 00 00"),
             )
         )
 
@@ -186,9 +220,9 @@ class GetZoneNameCommand(ZoneCommand):
     def body(self) -> bytes:
         return bytes().join(
             (
-                _MAGIC,
+                _COMMAND_MAGIC,
                 struct.pack("<H", 2 ** (self.zone - 1)),
-                bytes().fromhex("78 00 00"),
+                bytes.fromhex("78 00 00"),
             )
         )
 
@@ -221,6 +255,15 @@ class Response(metaclass=ABCMeta):
     def __init__(self, raw: bytes):
         self.raw = raw
 
+    @property
+    def body(self) -> bytes:
+        """
+        Return byte body which represents the command core.
+
+        The returned value must exclude HEAD, frame number and TAIL.
+        """
+        return self.raw[len(HEAD) + 1 : -len(TAIL)]
+
 
 class GetNumberOfZonesResponse(Response):
     """Parse a response for ``GetNumberOfZonesCommand``."""
@@ -239,7 +282,7 @@ class GetNumberOfZonesResponse(Response):
 
     @property
     def number(self):
-        return sum(1 for zone in self.raw[12:28] if zone != 0)
+        return sum(1 for zone in self.body[12:28] if zone != 0)
 
 
 class GetZoneNameResponse(Response):
@@ -249,4 +292,4 @@ class GetZoneNameResponse(Response):
 
     @property
     def name(self) -> str:
-        return self.raw[14:].decode("ascii", errors="replace").strip(" \x00")
+        return self.body[14:].decode("ascii", errors="replace").strip(" \x00")

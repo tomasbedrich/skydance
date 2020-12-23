@@ -37,3 +37,7 @@ $ python
 >>> import skydance
 >>> skydance.__version__
 ```
+
+# Links
+- http://dokuwiki.espaiweb.net
+- https://community.home-assistant.io/t/skydance-2-4g-rf/99399
