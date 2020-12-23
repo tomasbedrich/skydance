@@ -2,8 +2,6 @@ import asyncio
 import logging
 from typing import Tuple
 
-from skydance.constants import PORT
-
 
 log = logging.getLogger(__name__)
 
@@ -11,7 +9,7 @@ log = logging.getLogger(__name__)
 class Session:
     """A session object handling connection re-creation in case of its failure."""
 
-    def __init__(self, host, port=PORT):
+    def __init__(self, host, port):
         self.host = host
         self.port = port
         self._connection = None
@@ -51,17 +49,17 @@ class Session:
                 except (ConnectionResetError, ConnectionAbortedError):
                     await self._close_connection()
 
-    async def readuntil(self, separator=b"\n") -> bytes:
+    async def read(self, n=-1) -> bytes:
         """
-        Read a data from the transport until ``separator`` is found.
+        Read up to `n` bytes from the transport.
 
-        See: ``asyncio.streams.StreamReader.readuntil()``
+        See: ``asyncio.streams.StreamReader.read()``
         """
         async with self._read_lock:
             while True:
                 try:
                     reader, _ = await self._get_connection()
-                    res = await reader.readuntil(separator)
+                    res = await reader.read(n)
                     log.debug("Received: %s", res.hex(" "))
                     return res
                 except (ConnectionResetError, ConnectionAbortedError):

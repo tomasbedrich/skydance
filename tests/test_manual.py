@@ -3,9 +3,9 @@ import logging
 import os
 import pytest
 
-from skydance.commands import *
-from skydance.controller import Controller
-from skydance.session import Session
+from skydance.network.buffer import Buffer
+from skydance.network.session import Session
+from skydance.protocol import *
 
 
 pytestmark = pytest.mark.skipif(
@@ -19,73 +19,124 @@ IP = "192.168.3.218"
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.asyncio
-async def test_zone_discovery():
-    async with Session(IP) as sess:
-        controller = Controller(sess)
-
-        log.info("Getting number of zones")
-        await controller.write(GetNumberOfZonesCommand())
-        number_of_zones = GetNumberOfZonesResponse(await controller.read()).number
-
-        for zone in range(1, number_of_zones + 1):
-            log.info("Getting name of zone=%d", zone)
-            await controller.write(GetZoneNameCommand(zone=zone))
-            zone_name = GetZoneNameResponse(await controller.read()).name
-            log.info("Zone=%d has name=%s", zone, zone_name)
+@pytest.fixture(name="state")
+def state_fixture():
+    return State()
 
 
 @pytest.mark.asyncio
-async def test_ping():
-    async with Session(IP) as sess:
-        controller = Controller(sess)
-
-        log.info("Pinging")
-        await controller.write(PingCommand())
-        await asyncio.sleep(2)
+@pytest.fixture(name="session")
+async def session_fixture():
+    async with Session(IP, PORT) as session:
+        yield session
 
 
 @pytest.mark.asyncio
-async def test_master_on_off():
-    async with Session(IP) as sess:
-        controller = Controller(sess)
+@pytest.mark.parametrize(
+    "chunk_size", range(1, 41)
+)  # GetNumberOfZonesResponse is expected to be 36 bytes long
+async def test_buffered_read(state, session, chunk_size):
+    buffer = Buffer(TAIL)
 
-        log.info("Master on")
-        await controller.write(MasterPowerOnCommand())
-        await asyncio.sleep(2)
+    log.info("Testing buffered read with chunk_size=%d", chunk_size)
+    cmd = GetNumberOfZonesCommand(state).raw
+    await session.write(cmd)
+    state.increment_frame_number()
 
-        log.info("Master off")
-        await controller.write(MasterPowerOffCommand())
-        await asyncio.sleep(2)
+    # this is the code under test
+    while not buffer.is_message_ready:
+        chunk = await session.read(chunk_size)
+        buffer.feed(chunk)
+    res = buffer.get_message()
+
+    number_of_zones = GetNumberOfZonesResponse(res).number
+    log.info("Got number_of_zones=%d ", number_of_zones)
+
+
+@pytest.mark.asyncio
+async def test_state_frame_number_overflow(state, session):
+    log.info("Testing State.frame_number overflow")
+    for _ in range(256):
+        cmd = GetNumberOfZonesCommand(state).raw
+        await session.write(cmd)
+        state.increment_frame_number()
+        res = await session.read(64)
+        number_of_zones = GetNumberOfZonesResponse(res).number
+        log.debug("Got number_of_zones=%d", number_of_zones)
+
+
+@pytest.mark.asyncio
+async def test_zone_discovery(state, session):
+    log.info("Getting number of zones")
+    cmd = GetNumberOfZonesCommand(state).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    res = await session.read(64)
+    number_of_zones = GetNumberOfZonesResponse(res).number
+
+    for zone in range(1, number_of_zones + 1):
+        log.info("Getting name of zone=%d", zone)
+        cmd = GetZoneNameCommand(state, zone=zone).raw
+        await session.write(cmd)
+        state.increment_frame_number()
+        res = await session.read(64)
+        zone_name = GetZoneNameResponse(res).name
+        log.info("Zone=%d has name=%s", zone, zone_name)
+
+
+@pytest.mark.asyncio
+async def test_ping(state, session):
+    log.info("Pinging")
+    cmd = PingCommand(state).raw
+    await session.write(cmd)
+
+
+@pytest.mark.asyncio
+async def test_master_on_off(state, session):
+    log.info("Master on")
+    cmd = MasterPowerOnCommand(state).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
+
+    log.info("Master off")
+    cmd = MasterPowerOffCommand(state).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("zone", {1, 2})
-async def test_on_blink_temp_off(zone: int):
-    async with Session(IP) as sess:
-        controller = Controller(sess)
+async def test_on_blink_temp_off(state, session, zone: int):
+    log.info("Powering on")
+    cmd = PowerOnCommand(state, zone=zone).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
 
-        log.info("Powering on")
-        await controller.write(PowerOnCommand(zone=zone))
-        await asyncio.sleep(2)
+    log.info("Starting blink sequence")
+    cmd = BrightnessCommand(state, zone=zone, brightness=1).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(0.5)
+    cmd = BrightnessCommand(state, zone=zone, brightness=255).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
 
-        log.info("Starting blink sequence")
-        await controller.write(BrightnessCommand(zone=zone, brightness=1))
-        await asyncio.sleep(0.5)
-        await controller.write(BrightnessCommand(zone=zone, brightness=255))
-        await asyncio.sleep(2)
+    log.info("Starting white temperature change sequence")
+    cmd = TemperatureCommand(state, zone=zone, temperature=255).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(0.5)
+    cmd = TemperatureCommand(state, zone=zone, temperature=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
 
-        log.info("Starting white temperature change sequence")
-        await controller.write(TemperatureCommand(zone=zone, temperature=255))
-        await asyncio.sleep(0.5)
-        await controller.write(TemperatureCommand(zone=zone, temperature=0))
-        await asyncio.sleep(2)
-
-        log.info("Powering off")
-        await controller.write(PowerOffCommand(zone=zone))
-        # note - zone max+1 means controlling all zones at once
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    asyncio.run(test_zone_discovery())
+    log.info("Powering off")
+    cmd = PowerOffCommand(state, zone=zone).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    # note - zone max+1 means controlling all zones at once
