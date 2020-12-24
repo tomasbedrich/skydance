@@ -1,7 +1,7 @@
 [tool.poetry]
 
 name = "skydance"
-version = "0.0.1"
+version = "0.2.0"
 description = "A library for communication with Skydance lighting WiFi relay."
 
 license = "MIT"
@@ -22,7 +22,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Topic :: System :: Networking",
     "Topic :: System :: Hardware",
     "Topic :: Home Automation",
@@ -31,7 +30,6 @@ classifiers = [
 [tool.poetry.dependencies]
 
 python = "^3.8"
-pytest-asyncio = "^0.14.0"
 
 
 [tool.poetry.dev-dependencies]
@@ -51,6 +49,7 @@ pytest-cov = "*"
 pytest-describe = { git = "https://github.com/pytest-dev/pytest-describe", rev = "453aa9045b265e313f356f1492d8991c02a6aea6" } # use 2.0 when released
 pytest-expecter = "^2.1"
 pytest-random = "*"
+pytest-asyncio = "^0.14.0"
 
 # Reports
 coveragespace = "^3.1.1"
@@ -67,7 +66,6 @@ pync = { version = "*", platform = "darwin" }
 [tool.black]
 
 target-version = ["py36", "py37", "py38"]
-skip-string-normalization = true
 
 [build-system]
 
