@@ -30,13 +30,9 @@ $ poetry add skydance
 
 # Usage
 
-After installation, the package can imported:
+TODO
 
-```text
-$ python
->>> import skydance
->>> skydance.__version__
-```
+In meantime, please see `test/test_manual.py`.
 
 # Links
 - http://dokuwiki.espaiweb.net
