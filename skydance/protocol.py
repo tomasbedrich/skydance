@@ -245,12 +245,7 @@ class Response(metaclass=ABCMeta):
     """A base response."""
 
     raw: bytes
-    """
-    Raw bytes received as a response.
-
-    It must exclude HEAD, frame number and TAIL.
-    These are removed automatically in ``Controller``.
-    """
+    """Raw bytes received as a response."""
 
     def __init__(self, raw: bytes):
         self.raw = raw
