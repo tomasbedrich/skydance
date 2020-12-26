@@ -287,4 +287,4 @@ class GetZoneNameResponse(Response):
 
     @property
     def name(self) -> str:
-        return self.body[14:].decode("ascii", errors="replace").strip(" \x00")
+        return self.body[14:].decode("utf-8", errors="replace").strip(" \x00")
