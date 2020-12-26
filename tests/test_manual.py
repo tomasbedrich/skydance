@@ -2,8 +2,10 @@ import asyncio
 import logging
 import os
 import pytest
+import socket
 
 from skydance.network.buffer import Buffer
+from skydance.network.discovery import DiscoveryProtocol
 from skydance.network.session import Session
 from skydance.protocol import *
 
@@ -140,3 +142,16 @@ async def test_on_blink_temp_off(state, session, zone: int):
     await session.write(cmd)
     state.increment_frame_number()
     # note - zone max+1 means controlling all zones at once
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("broadcast", {False, True})
+async def test_discovery(broadcast):
+    loop = asyncio.get_event_loop()
+    protocol: DiscoveryProtocol = DiscoveryProtocol(IP, broadcast=broadcast)
+    await loop.create_datagram_endpoint(lambda: protocol, family=socket.AF_INET)
+    for _ in range(3):
+        protocol.send_discovery_request()
+        await asyncio.sleep(1)
+    for mac, ip in protocol.result.items():
+        log.info("Discovered MAC: %s, IP: %s", mac.hex(":"), ip)
