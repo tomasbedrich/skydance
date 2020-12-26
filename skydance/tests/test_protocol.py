@@ -163,5 +163,12 @@ def test_get_zone_name_invalid(zone: int):
         ),
     ],
 )
-def test_get_zone_name_response(variant):
+def test_get_zone_name_response_strip(variant):
     assert GetZoneNameResponse(variant).name == "Zone RGB+CCT"
+
+
+def test_get_zone_name_response_utf_8():
+    raw = bytes.fromhex(
+        "55aa5aa57e02800080e18026510200f8100021004b75636879c58820746f70000000007e"
+    )
+    assert GetZoneNameResponse(raw).name == "Kuchyň top"
