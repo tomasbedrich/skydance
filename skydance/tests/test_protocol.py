@@ -1,5 +1,3 @@
-# Following test cases are based on real communication with controller.
-
 import pytest
 
 from skydance.protocol import *

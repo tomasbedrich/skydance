@@ -34,9 +34,10 @@ class Session:
 
     async def write(self, data: bytes):
         """
-        Write a data to the transport.
+        Write a data to the transport and drain immediatelly.
 
-        See: ``asyncio.streams.StreamWriter.write()``
+        This is a wrapper on top of
+        [`asyncio.streams.StreamWriter.write()`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write)
         """
         async with self._write_lock:
             while True:
@@ -53,7 +54,8 @@ class Session:
         """
         Read up to `n` bytes from the transport.
 
-        See: ``asyncio.streams.StreamReader.read()``
+        This is a wrapper on top of
+        [`asyncio.streams.StreamReader.read()`](https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader.read)
         """
         async with self._read_lock:
             while True:
@@ -66,9 +68,11 @@ class Session:
                     await self._close_connection()
 
     async def close(self):
+        """Close connection."""
         await self._close_connection()
 
     async def __aenter__(self):
+        """Return auto-closing context manager."""
         await self._get_connection()
         return self
 

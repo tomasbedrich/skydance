@@ -1,18 +1,42 @@
 site_name: Skydance
-site_description: A library for communication with Skydance lighting WiFi relay.
+site_description: A library for communication with Skydance Wi-Fi relays.
 site_author: Tomas Bedrich
+copyright: Copyright &copy; 2020 Tomas Bedrich
 
 repo_url: https://github.com/tomasbedrich/skydance
 edit_uri: https://github.com/tomasbedrich/skydance/edit/master/docs
 
-theme: readthedocs
+theme:
+  name: material
+  palette:
+    scheme: preference
+    primary: pink
+    accent: pink
 
 markdown_extensions:
   - codehilite
+  - admonition
+  - toc:
+      permalink: True
+
+plugins:
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: false
+            show_root_toc_entry: false
+            show_root_heading: true
+            heading_level: 3
+      watch:
+        - skydance
 
 nav:
   - Home: index.md
-  - Advanced: advanced.md
+  - API:
+    - Protocol: api/protocol.md
+    - Network: api/network.md
   - About:
     - Release Notes: about/changelog.md
     - Contributing: about/contributing.md

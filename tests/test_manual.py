@@ -11,7 +11,7 @@ from skydance.protocol import *
 
 pytestmark = pytest.mark.skipif(
     "CI" in os.environ,
-    reason="Manual test is supposed to run against a physical controller "
+    reason="Manual test is supposed to run against a physical Wi-Fi relay "
     "attached to the local network.",
 )
 

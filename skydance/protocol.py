@@ -4,12 +4,16 @@ from functools import partial
 
 
 PORT = 8899
+"""A port used for communication with a relay."""
 
 HEAD = bytes.fromhex("55 aa 5a a5 7e")
+"""A magic byte sequence used as a header for each command and response."""
+
 TAIL = bytes.fromhex("00 7e")
+"""A magic byte sequence marking end of each command and response."""
 
 # This is repeated through many commands, don't know why yet.
-# It probably has something to do with a Controller ID.
+# It probably has something to do with a relay ID.
 # But as reported by other users, it is working with hardcoded ID as well.
 # See: https://github.com/tomasbedrich/home-assistant-skydance/issues/1
 _COMMAND_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
@@ -24,6 +28,12 @@ class State:
         self._frame_number = 0
 
     def increment_frame_number(self):
+        """
+        Increment a frame number used by a relay to reconstruct a network stream.
+
+        !!! important
+            The frame number must be (manually) incremented after each command.
+        """
         self._frame_number = (self._frame_number + 1) % 256
 
     @property
@@ -34,10 +44,13 @@ class State:
 class Command(metaclass=ABCMeta):
     """A base command."""
 
-    state: State
-    """A state of connection used to generate byte output of a command."""
-
     def __init__(self, state: State):
+        """
+        Create a Command.
+
+        Args:
+            state: A state of connection used to generate byte output of a command.
+        """
         self.state = state
 
     @property
@@ -51,31 +64,42 @@ class Command(metaclass=ABCMeta):
         """
         Return byte body which represents the command core.
 
-        The returned value must exclude HEAD, frame number and TAIL.
-        These are added automatically in ``Command.bytes``.
+        The returned value exclude [HEAD][skydance.protocol.HEAD],
+        frame number and [TAIL][skydance.protocol.TAIL]. These are added
+        automatically in [`Command.raw`][skydance.protocol.Command.raw].
         """
 
 
 class PingCommand(Command):
-    """Ping controller to raise a communication error if something is wrong."""
+    """Ping a relay to raise a communication error if something is wrong."""
 
     body = bytes.fromhex("80 00 80 e1 80 00 00 01 00 79 00 00")
 
 
 class ZoneCommand(Command, metaclass=ABCMeta):
-    """A command which controls a specific Zone."""
+    """A base command which controls a specific Zone."""
 
-    zone: int
-    """A zone number to control."""
+    def __init__(self, *args, zone: int, **kwargs):
+        """
+        Create a .
 
-    def __init__(self, *args, zone, **kwargs):
+        Args:
+            *args: See [Command][skydance.protocol.Command].
+            zone: A zone number to control.
+            **kwargs: See [Command][skydance.protocol.Command].
+        """
         super().__init__(*args, **kwargs)
         self.validate_zone(zone)
         self.zone = zone
 
     @staticmethod
     def validate_zone(zone: int):
-        """Raise ValueError if zone number is invalid."""
+        """
+        Validate a zone number.
+
+        Raise:
+            ValueError: If zone number is invalid.
+        """
         try:
             if not 0 <= zone <= 255:
                 raise ValueError("Zone number must fit into one byte.")
@@ -86,10 +110,15 @@ class ZoneCommand(Command, metaclass=ABCMeta):
 class PowerCommand(ZoneCommand):
     """Power a Zone on/off."""
 
-    power: bool
-    """A power on/off state."""
+    def __init__(self, *args, power: bool, **kwargs):
+        """
+        Create a PowerCommand.
 
-    def __init__(self, *args, power, **kwargs):
+        Args:
+            *args: See [ZoneCommand][skydance.protocol.ZoneCommand].
+            power: A power on/off state.
+            **kwargs: See [ZoneCommand][skydance.protocol.ZoneCommand].
+        """
         super().__init__(*args, **kwargs)
         self.power = power
 
@@ -112,10 +141,15 @@ PowerOffCommand = partial(PowerCommand, power=False)
 class MasterPowerCommand(Command):
     """Power all zones on/off."""
 
-    power: bool
-    """A power on/off state."""
+    def __init__(self, *args, power: bool, **kwargs):
+        """
+        Create a MasterPowerCommand.
 
-    def __init__(self, *args, power, **kwargs):
+        Args:
+            *args: See [Command][skydance.protocol.Command].
+            power: A power on/off state.
+            **kwargs: See [Command][skydance.protocol.Command].
+        """
         super().__init__(*args, **kwargs)
         self.power = power
 
@@ -139,17 +173,27 @@ MasterPowerOffCommand = partial(MasterPowerCommand, power=False)
 class BrightnessCommand(ZoneCommand):
     """Change brightness of a Zone."""
 
-    brightness: int
-    """A brightness level between 1-255 (higher = more bright)."""
+    def __init__(self, *args, brightness: int, **kwargs):
+        """
+        Create a BrightnessCommand.
 
-    def __init__(self, *args, brightness, **kwargs):
+        Args:
+            *args: See [ZoneCommand][skydance.protocol.ZoneCommand].
+            brightness: A brightness level between 1-255 (higher = more bright).
+            **kwargs: See [ZoneCommand][skydance.protocol.ZoneCommand].
+        """
         super().__init__(*args, **kwargs)
         self.validate_brightness(brightness)
         self.brightness = brightness
 
     @staticmethod
     def validate_brightness(brightness: int):
-        """Raise ValueError if brightness level is invalid."""
+        """
+        Validate a brightness level.
+
+        Raise:
+            ValueError: If brightness level is invalid.
+        """
         try:
             if not 1 <= brightness <= 255:
                 raise ValueError("Brightness level must fit into one byte and be >= 1.")
@@ -171,17 +215,27 @@ class BrightnessCommand(ZoneCommand):
 class TemperatureCommand(ZoneCommand):
     """Change white temperature of a Zone."""
 
-    temperature: int
-    """A temperature level between 0-255 (higher = more cold)."""
+    def __init__(self, *args, temperature: int, **kwargs):
+        """
+        Create a TemperatureCommand.
 
-    def __init__(self, *args, temperature, **kwargs):
+        Args:
+            *args: See [ZoneCommand][skydance.protocol.ZoneCommand].
+            temperature: A temperature level between 0-255 (higher = more cold).
+            **kwargs: See [ZoneCommand][skydance.protocol.ZoneCommand].
+        """
         super().__init__(*args, **kwargs)
         self.validate_temperature(temperature)
         self.temperature = temperature
 
     @staticmethod
     def validate_temperature(temperature: int):
-        """Raise ValueError if temperature level is invalid."""
+        """
+        Validate a temperature level.
+
+        Raise:
+            ValueError: If temperature level is invalid.
+        """
         try:
             if not 0 <= temperature <= 255:
                 raise ValueError("Temperature level must fit into one byte.")
@@ -229,10 +283,13 @@ class GetZoneNameCommand(ZoneCommand):
     @staticmethod
     def validate_zone(zone: int):
         """
-        Raise ValueError if zone number is invalid.
+        Validate a zone number.
 
         It may be invalid either because it is not a number
         or it may be outside of range defined by a SkyDance app.
+
+        Raise:
+            ValueError: If zone number is invalid.
         """
         try:
             if not 1 <= zone <= 16:
@@ -244,10 +301,13 @@ class GetZoneNameCommand(ZoneCommand):
 class Response(metaclass=ABCMeta):
     """A base response."""
 
-    raw: bytes
-    """Raw bytes received as a response."""
-
     def __init__(self, raw: bytes):
+        """
+        Create a Response.
+
+        Args:
+            raw: Raw bytes received as a response.
+        """
         self.raw = raw
 
     @property
@@ -255,13 +315,18 @@ class Response(metaclass=ABCMeta):
         """
         Return byte body which represents the command core.
 
-        The returned value must exclude HEAD, frame number and TAIL.
+        The returned value exclude [HEAD][skydance.protocol.HEAD],
+        frame number and [TAIL][skydance.protocol.TAIL].
         """
         return self.raw[len(HEAD) + 1 : -len(TAIL)]
 
 
 class GetNumberOfZonesResponse(Response):
-    """Parse a response for ``GetNumberOfZonesCommand``."""
+    """
+    Parse a response for `GetNumberOfZonesCommand`.
+
+    See: [`GetNumberOfZonesCommand`][skydance.protocol.GetNumberOfZonesCommand].
+    """
 
     # The packets looks like:
     # ... omitted ... 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 90 00 7e - 16 zones
@@ -277,14 +342,20 @@ class GetNumberOfZonesResponse(Response):
 
     @property
     def number(self):
+        """Return number of zones available."""
         return sum(1 for zone in self.body[12:28] if zone != 0)
 
 
 class GetZoneNameResponse(Response):
-    """Parse a response for ``DiscoverZoneCommand``."""
+    """
+    Parse a response for `GetZoneNameCommand`.
+
+    See: [`GetZoneNameCommand`][skydance.protocol.GetZoneNameCommand].
+    """
 
     # Name offset experimentally decoded from response packets.
 
     @property
     def name(self) -> str:
+        """Return a zone name."""
         return self.body[14:].decode("utf-8", errors="replace").strip(" \x00")
