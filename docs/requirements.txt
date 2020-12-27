@@ -1,5 +1,5 @@
-mkdocs @ file:///Users/tbedrich/Library/Caches/pypoetry/artifacts/9a/d7/52/818c6f01acc30cbc143ac4fa31b4963dae49f00ec4576b25ff84668345/mkdocs-1.1.2-py3-none-any.whl
-mkdocs-material @ file:///Users/tbedrich/Library/Caches/pypoetry/artifacts/29/cc/a1/e7e32eec7826da31140106e79c11487daeb6430496c22cec3f80756340/mkdocs_material-6.2.2-py2.py3-none-any.whl
-mkdocs-material-extensions @ file:///Users/tbedrich/Library/Caches/pypoetry/artifacts/26/5a/a3/33f73d7ceea96eeba0459e7c05e213a36203d52568d4c278a0c2882f1e/mkdocs_material_extensions-1.0.1-py3-none-any.whl
-mkdocstrings @ file:///Users/tbedrich/Library/Caches/pypoetry/artifacts/26/df/8a/1a555b956436efb4309db4a34c336f0282d86a059289f6a537b20b0d0a/mkdocstrings-0.13.6-py3-none-any.whl
-Pygments @ file:///Users/tbedrich/Library/Caches/pypoetry/artifacts/e5/a5/53/d98f2a9beba10dd0ffb48968f421a7d8c4339a9ed2bb90b668bdbf1772/Pygments-2.7.3-py3-none-any.whl
+mkdocs==1.1.2
+mkdocs-material==6.2.2
+mkdocs-material-extensions==1.0.1
+mkdocstrings==0.13.6
+Pygments==2.7.3
