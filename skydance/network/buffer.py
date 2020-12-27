@@ -10,6 +10,7 @@ class Buffer:
     A buffer which allows feeding chunks of messages and reading them out complete.
 
     It is specificaly tailored for:
+
     - Protocols sending byte messages ending with pre-defined tail sequence.
     - Tail sequence length must be 2 bytes.
     """
@@ -20,6 +21,12 @@ class Buffer:
     _buffered_messages: int
 
     def __init__(self, tail: bytes):
+        """
+        Create a Buffer.
+
+        Args:
+            tail: Tail byte sequence.
+        """
         if len(tail) != 2:
             raise ValueError(
                 "This buffer class supports only protocols with `len(tail) == 2`."
@@ -44,6 +51,9 @@ class Buffer:
         Feed byte chunk into a buffer.
 
         Update count of messages contained in the buffer.
+
+        Args:
+            chunk: Byte chunk of any length.
         """
         previous_tail_byte = self._buffer[-1] if self._buffer else None
         self._buffer.extend(chunk)
@@ -60,7 +70,8 @@ class Buffer:
         """
         Return a single message.
 
-        Raise ValueError if message is incomplete.
+        Raise:
+            ValueError: If message is incomplete.
         """
         if not self.is_message_ready:
             raise ValueError("No complete message is buffered yet.")

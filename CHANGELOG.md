@@ -1,3 +1,7 @@
-# 0.0.0 (YYYY-MM-DD)
+# 0.0.2 (2020-12-XX)
 
- - TBD
+TODO
+
+# 0.0.1 (2020-10-13)
+
+- First public release.

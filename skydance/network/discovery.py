@@ -14,9 +14,9 @@ DiscoveryResult = Mapping[MacAddress, Iterable[ipaddress.IPv4Address]]
 
 class DiscoveryProtocol(asyncio.DatagramProtocol):
     """
-    Implement discovery protocol used by Skydance lighting WiFi relay.
+    Implement discovery protocol used by Skydance Wi-Fi relays.
 
-    Skydance uses HF-LPT130 chip for network communication (WiFi settings,
+    Skydance uses HF-LPT130 chip for network communication (Wi-Fi settings,
     passing network data to another chips inside, network discovery).
 
     See Also:
@@ -81,10 +81,10 @@ class DiscoveryProtocol(asyncio.DatagramProtocol):
 
 
 async def discover_ips_by_mac(
-    ip, *, broadcast: bool = False, retry: int = 3, sleep: float = 1
+    ip: str, *, broadcast: bool = False, retry: int = 3, sleep: float = 1
 ) -> DiscoveryResult:
     """
-    Discover Skydance WiFi relays.
+    Discover Skydance Wi-Fi relays.
 
     Args:
         ip: IP target of discovery protocol. Can be either individual device IP (to get
@@ -95,7 +95,7 @@ async def discover_ips_by_mac(
         sleep: Sleep time between subsequent discovery requests.
 
     Returns:
-        Mapping of found Skydance WiFi relays. Their MAC address is the key and their
+        Mapping of found Skydance Wi-Fi relays. Their MAC address is the key and their
         IP addresses are the values (stored in `set`).
     """
     protocol = DiscoveryProtocol()
