@@ -127,8 +127,9 @@ class PowerCommand(ZoneCommand):
         return bytes().join(
             (
                 _COMMAND_MAGIC,
-                struct.pack("B", self.zone),
-                bytes.fromhex("00 0a 01 00"),
+                # TODO: zone number is probably a 2 byte bitmask of what zones to power on/off
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes.fromhex("0a 01 00"),
                 bytes.fromhex("01" if self.power else "00"),
             )
         )
@@ -205,8 +206,8 @@ class BrightnessCommand(ZoneCommand):
         return bytes().join(
             (
                 _COMMAND_MAGIC,
-                struct.pack("B", self.zone),
-                bytes.fromhex("00 07 02 00 00"),
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes.fromhex("07 02 00 00"),
                 struct.pack("B", self.brightness),
             )
         )
@@ -247,8 +248,8 @@ class TemperatureCommand(ZoneCommand):
         return bytes().join(
             (
                 _COMMAND_MAGIC,
-                struct.pack("B", self.zone),
-                bytes.fromhex("00 0D 02 00 00"),
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes.fromhex("0D 02 00 00"),
                 struct.pack("B", self.temperature),
             )
         )

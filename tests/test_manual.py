@@ -109,7 +109,7 @@ async def test_master_on_off(state, session):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("zone", {1, 2})
+@pytest.mark.parametrize("zone", {1, 2, 3})
 async def test_on_blink_temp_off(state, session, zone: int):
     log.info("Powering on")
     cmd = PowerOnCommand(state, zone=zone).raw
@@ -142,6 +142,7 @@ async def test_on_blink_temp_off(state, session, zone: int):
     await session.write(cmd)
     state.increment_frame_number()
     # note - zone max+1 means controlling all zones at once
+    await asyncio.sleep(0.25)
 
 
 @pytest.mark.asyncio

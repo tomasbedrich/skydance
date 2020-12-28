@@ -1,3 +1,7 @@
+# 0.1.1 (2020-12-28)
+
+- Fix byte representation of zone IDs higher than 2.
+
 # 0.1.0 (2020-12-27)
 
 - Implement `Session` with connection re-creation in case of its failure.

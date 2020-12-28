@@ -40,6 +40,12 @@ def test_power_on(state):
     )
 
 
+def test_power_on_higher_zone_number(state):
+    assert PowerOnCommand(state, zone=15).body == bytes.fromhex(
+        "800080e180000000400a010001"
+    )
+
+
 def test_power_off(state):
     assert PowerOffCommand(state, zone=2).body == bytes.fromhex(
         "800080e180000002000a010000"
