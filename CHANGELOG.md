@@ -1,3 +1,7 @@
+# 0.1.2 (2021-01-17)
+
+- Suppress network errors during session closing.
+
 # 0.1.1 (2020-12-28)
 
 - Fix byte representation of zone IDs higher than 2.
