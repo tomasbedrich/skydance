@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import logging
 from typing import Tuple
 
@@ -29,7 +30,8 @@ class Session:
             log.debug("Closing connection to: %s:%d", self.host, self.port)
             _, writer = self._connection
             writer.close()
-            await writer.wait_closed()
+            with contextlib.suppress(ConnectionError, TimeoutError):
+                await writer.wait_closed()
             self._connection = None
 
     async def write(self, data: bytes):
