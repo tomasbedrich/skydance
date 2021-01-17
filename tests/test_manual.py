@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skipif(
     "attached to the local network.",
 )
 
-IP = "192.168.3.218"
+IP = os.getenv("IP", default="192.168.2.30")
 IP_BROADCAST = "192.168.3.255"
 
 log = logging.getLogger(__name__)
