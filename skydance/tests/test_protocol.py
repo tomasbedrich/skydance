@@ -106,6 +106,50 @@ def test_temperature_invalid(temperature):
         TemperatureCommand.validate_temperature(temperature)
 
 
+def test_color_individuals_components(state):
+    assert ColorCommand(state, zone=2, red=255, green=0, blue=0).body == bytes.fromhex(
+        "800080e18000000200010700ff000000000000"
+    )
+    assert ColorCommand(state, zone=2, red=0, green=255, blue=0).body == bytes.fromhex(
+        "800080e1800000020001070000ff0000000000"
+    )
+    assert ColorCommand(state, zone=2, red=0, green=0, blue=255).body == bytes.fromhex(
+        "800080e180000002000107000000ff00000000"
+    )
+
+
+def test_color_mixed(state):
+    assert ColorCommand(
+        state, zone=2, red=255, green=128, blue=64
+    ).body == bytes.fromhex("800080e18000000200010700ff804000000000")
+
+
+def test_color_all_zero(state):
+    with pytest.raises(expected_exception=ValueError):
+        ColorCommand(state, zone=2, red=0, green=0, blue=0)
+
+
+def test_color_min(state):
+    assert ColorCommand(state, zone=2, red=0, green=1, blue=0).body == bytes.fromhex(
+        "800080e1800000020001070000010000000000"
+    )
+
+
+def test_color_max(state):
+    assert ColorCommand(
+        state, zone=2, red=255, green=255, blue=255
+    ).body == bytes.fromhex("800080e18000000200010700ffffff00000000")
+
+
+@pytest.mark.parametrize(
+    "color",
+    [256, -1, 99999999999, "foo", None],
+)
+def test_color_invalid(color):
+    with pytest.raises(expected_exception=ValueError):
+        ColorCommand.validate_color(color, hint="foo")
+
+
 def test_get_number_of_zones(state):
     assert GetNumberOfZonesCommand(state).body == bytes.fromhex(
         "800080e18000000100790000"

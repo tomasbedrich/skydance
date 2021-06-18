@@ -81,7 +81,7 @@ class ZoneCommand(Command, metaclass=ABCMeta):
 
     def __init__(self, *args, zone: int, **kwargs):
         """
-        Create a .
+        Create a ZoneCommand.
 
         Args:
             *args: See [Command][skydance.protocol.Command].
@@ -251,6 +251,67 @@ class TemperatureCommand(ZoneCommand):
                 struct.pack("<H", 2 ** (self.zone - 1)),
                 bytes.fromhex("0D 02 00 00"),
                 struct.pack("B", self.temperature),
+            )
+        )
+
+
+class ColorCommand(ZoneCommand):
+    """Change color of a Zone."""
+
+    def __init__(self, *args, red: int, green: int, blue: int, **kwargs):
+        """
+        Create a ColorCommand.
+
+        All color levels are between 0-255,
+        where higher number means more intensive color component.
+
+        At least one color component must be set to non-zero.
+
+        Args:
+            *args: See [ZoneCommand][skydance.protocol.ZoneCommand].
+            red: A red level.
+            green: A green level.
+            blue: A blue level.
+            **kwargs: See [ZoneCommand][skydance.protocol.ZoneCommand].
+        """
+        super().__init__(*args, **kwargs)
+
+        self.validate_color(red, hint="red")
+        self.validate_color(green, hint="green")
+        self.validate_color(blue, hint="blue")
+
+        if not red and not green and not blue:
+            raise ValueError("At least one color component must be set to non-zero.")
+
+        self.red = red
+        self.green = green
+        self.blue = blue
+
+    @staticmethod
+    def validate_color(color: int, hint: str):
+        """
+        Validate a color level.
+
+        Raise:
+            ValueError: If color level is invalid.
+        """
+        try:
+            if not 0 <= color <= 255:
+                raise ValueError(f"Color level of {hint} must fit into one byte.")
+        except TypeError as e:
+            raise ValueError(f"Color level of {hint} must be int-like.") from e
+
+    @property
+    def body(self) -> bytes:
+        return bytes().join(
+            (
+                _COMMAND_MAGIC,
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes.fromhex("01 07 00"),
+                struct.pack("B", self.red),
+                struct.pack("B", self.green),
+                struct.pack("B", self.blue),
+                bytes.fromhex("00 00 00 00"),
             )
         )
 
