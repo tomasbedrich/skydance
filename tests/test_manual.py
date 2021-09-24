@@ -137,16 +137,20 @@ async def test_on_blink_temp_off(state, session, zone: int):
     state.increment_frame_number()
     await asyncio.sleep(2)
 
-    log.info("Starting color change sequence")
-    cmd = ColorCommand(state, zone=zone, red=255, green=0, blue=0).raw
+    log.info("Starting RGBW change sequence")
+    cmd = RGBWCommand(state, zone=zone, red=255, green=0, blue=0, white=0).raw
     await session.write(cmd)
     state.increment_frame_number()
     await asyncio.sleep(1)
-    cmd = ColorCommand(state, zone=zone, red=0, green=255, blue=0).raw
+    cmd = RGBWCommand(state, zone=zone, red=0, green=255, blue=0, white=0).raw
     await session.write(cmd)
     state.increment_frame_number()
     await asyncio.sleep(1)
-    cmd = ColorCommand(state, zone=zone, red=0, green=0, blue=255).raw
+    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=255, white=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(1)
+    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=0, white=255).raw
     await session.write(cmd)
     state.increment_frame_number()
     await asyncio.sleep(2)

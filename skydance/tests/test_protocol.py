@@ -106,48 +106,51 @@ def test_temperature_invalid(temperature):
         TemperatureCommand.validate_temperature(temperature)
 
 
-def test_color_individuals_components(state):
-    assert ColorCommand(state, zone=2, red=255, green=0, blue=0).body == bytes.fromhex(
-        "800080e18000000200010700ff000000000000"
-    )
-    assert ColorCommand(state, zone=2, red=0, green=255, blue=0).body == bytes.fromhex(
-        "800080e1800000020001070000ff0000000000"
-    )
-    assert ColorCommand(state, zone=2, red=0, green=0, blue=255).body == bytes.fromhex(
-        "800080e180000002000107000000ff00000000"
-    )
+def test_rgbw_individuals_components(state):
+    assert RGBWCommand(
+        state, zone=2, red=255, green=0, blue=0, white=0
+    ).body == bytes.fromhex("800080e18000000200010700ff000000000000")
+    assert RGBWCommand(
+        state, zone=2, red=0, green=255, blue=0, white=0
+    ).body == bytes.fromhex("800080e1800000020001070000ff0000000000")
+    assert RGBWCommand(
+        state, zone=2, red=0, green=0, blue=255, white=0
+    ).body == bytes.fromhex("800080e180000002000107000000ff00000000")
+    assert RGBWCommand(
+        state, zone=2, red=0, green=0, blue=0, white=255
+    ).body == bytes.fromhex("800080e18000000200010700000000ff000000")
 
 
-def test_color_mixed(state):
-    assert ColorCommand(
-        state, zone=2, red=255, green=128, blue=64
-    ).body == bytes.fromhex("800080e18000000200010700ff804000000000")
+def test_rgbw_mixed(state):
+    assert RGBWCommand(
+        state, zone=2, red=255, green=128, blue=64, white=1
+    ).body == bytes.fromhex("800080e18000000200010700ff804001000000")
 
 
-def test_color_all_zero(state):
+def test_rgbw_all_zero(state):
     with pytest.raises(expected_exception=ValueError):
-        ColorCommand(state, zone=2, red=0, green=0, blue=0)
+        RGBWCommand(state, zone=2, red=0, green=0, blue=0, white=0)
 
 
-def test_color_min(state):
-    assert ColorCommand(state, zone=2, red=0, green=1, blue=0).body == bytes.fromhex(
-        "800080e1800000020001070000010000000000"
-    )
+def test_rgbw_min(state):
+    assert RGBWCommand(
+        state, zone=2, red=0, green=1, blue=0, white=0
+    ).body == bytes.fromhex("800080e1800000020001070000010000000000")
 
 
-def test_color_max(state):
-    assert ColorCommand(
-        state, zone=2, red=255, green=255, blue=255
-    ).body == bytes.fromhex("800080e18000000200010700ffffff00000000")
+def test_rgbw_max(state):
+    assert RGBWCommand(
+        state, zone=2, red=255, green=255, blue=255, white=255
+    ).body == bytes.fromhex("800080e18000000200010700ffffffff000000")
 
 
 @pytest.mark.parametrize(
-    "color",
+    "component",
     [256, -1, 99999999999, "foo", None],
 )
-def test_color_invalid(color):
+def test_rgbw_invalid(component):
     with pytest.raises(expected_exception=ValueError):
-        ColorCommand.validate_color(color, hint="foo")
+        RGBWCommand.validate_component(component, hint="foo")
 
 
 def test_get_number_of_zones(state):

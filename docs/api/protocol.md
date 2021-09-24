@@ -23,6 +23,7 @@
 ::: skydance.protocol.MasterPowerOffCommand
 ::: skydance.protocol.BrightnessCommand
 ::: skydance.protocol.TemperatureCommand
+::: skydance.protocol.RGBWCommand
 ::: skydance.protocol.GetNumberOfZonesCommand
 ::: skydance.protocol.GetZoneNameCommand
 
