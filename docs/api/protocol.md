@@ -1,6 +1,6 @@
 # Protocol
 
-## Constatnts
+## Constants
 
 ::: skydance.protocol.PORT
 ::: skydance.protocol.HEAD

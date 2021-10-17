@@ -4,6 +4,7 @@
 - Add zone type detection and parsing.
 
 **BREAKING CHANGES:**
+
 - `skydance.protocol.GetZoneNameCommand` renamed to `skydance.protocol.GetZoneInfoCommand`.
 - `skydance.protocol.GetZoneNameResponse` renamed to `skydance.protocol.GetZoneInfoResponse`.
 

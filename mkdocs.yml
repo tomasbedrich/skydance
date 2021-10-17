@@ -37,6 +37,7 @@ nav:
   - API:
     - Protocol: api/protocol.md
     - Network: api/network.md
+    - Enums: api/enum.md
   - About:
     - Release Notes: about/changelog.md
     - Contributing: about/contributing.md
