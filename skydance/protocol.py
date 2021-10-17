@@ -2,6 +2,8 @@ import struct
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
+from skydance.enum import ZoneType
+
 
 PORT = 8899
 """A port used for communication with a relay."""
@@ -333,7 +335,7 @@ class GetNumberOfZonesCommand(Command):
         )
 
 
-class GetZoneNameCommand(ZoneCommand):
+class GetZoneInfoCommand(ZoneCommand):
     """Discover a zone according to it's number."""
 
     @property
@@ -412,16 +414,20 @@ class GetNumberOfZonesResponse(Response):
         return sum(1 for zone in self.body[12:28] if zone != 0)
 
 
-class GetZoneNameResponse(Response):
+class GetZoneInfoResponse(Response):
     """
-    Parse a response for `GetZoneNameCommand`.
+    Parse a response for `GetZoneInfoCommand`.
 
-    See: [`GetZoneNameCommand`][skydance.protocol.GetZoneNameCommand].
+    See: [`GetZoneInfoCommand`][skydance.protocol.GetZoneInfoCommand].
     """
 
-    # Name offset experimentally decoded from response packets.
+    @property
+    def type(self) -> ZoneType:
+        """Return a zone type."""
+        return ZoneType(self.body[12])
 
     @property
     def name(self) -> str:
         """Return a zone name."""
+        # Name offset experimentally decoded from response packets.
         return self.body[14:].decode("utf-8", errors="replace").strip(" \x00")

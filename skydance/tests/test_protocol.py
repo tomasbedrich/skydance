@@ -179,7 +179,7 @@ def test_get_number_of_zones_response(response, num):
     range(1, 17),
 )
 def test_get_zone_name(state, zone: int):
-    res = GetZoneNameCommand(state, zone=zone).body
+    res = GetZoneInfoCommand(state, zone=zone).body
     zone_encoded = 2 ** (zone - 1)
     expected = bytes().join(
         (
@@ -197,7 +197,7 @@ def test_get_zone_name(state, zone: int):
 )
 def test_get_zone_name_invalid(zone: int):
     with pytest.raises(expected_exception=ValueError):
-        GetZoneNameCommand.validate_zone(zone)
+        GetZoneInfoCommand.validate_zone(zone)
 
 
 @pytest.mark.parametrize(
@@ -214,12 +214,33 @@ def test_get_zone_name_invalid(zone: int):
         ),
     ],
 )
-def test_get_zone_name_response_strip(variant):
-    assert GetZoneNameResponse(variant).name == "Zone RGB+CCT"
+def test_get_zone_info_response_strip(variant):
+    zone_info = GetZoneInfoResponse(variant)
+    assert zone_info.name == "Zone RGB+CCT"
 
 
-def test_get_zone_name_response_utf_8():
+def test_get_zone_info_response_utf_8():
     raw = bytes.fromhex(
         "55aa5aa57e02800080e18026510200f8100021004b75636879c58820746f70000000007e"
     )
-    assert GetZoneNameResponse(raw).name == "Kuchyň top"
+    zone_info = GetZoneInfoResponse(raw)
+    assert zone_info.name == "Kuchyň top"
+
+
+zone_info_params = {
+    "55aa5aa57e568000805dc126518000f8100001005a6f6e6520537769746368000000007e": ZoneType.Switch,
+    "55aa5aa57e05800080e18026511000f8100011005a6f6e652044696d6d6572000000007e": ZoneType.Dimmer,
+    "55aa5aa57e528000805dc126510800f8100021005a6f6e6520434354000000000000007e": ZoneType.CCT,
+    "55aa5aa57e538000805dc126511000f8100031005a6f6e6520524742000000000000007e": ZoneType.RGB,
+    "55aa5aa57e548000805dc126512000f8100041005a6f6e6520524742570000000000007e": ZoneType.RGBW,
+    "55aa5aa57e00800080e18026514000f8100051005a6f6e65205247422b4343540000007e": ZoneType.RGBCCT,
+}
+
+
+@pytest.mark.parametrize(
+    "raw, expected_type",
+    [(bytes.fromhex(raw), zt) for raw, zt in zone_info_params.items()],
+)
+def test_get_zone_info_response_types(raw, expected_type):
+    zone_info = GetZoneInfoResponse(raw)
+    assert zone_info.type == expected_type

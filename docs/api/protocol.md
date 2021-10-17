@@ -25,10 +25,10 @@
 ::: skydance.protocol.TemperatureCommand
 ::: skydance.protocol.RGBWCommand
 ::: skydance.protocol.GetNumberOfZonesCommand
-::: skydance.protocol.GetZoneNameCommand
+::: skydance.protocol.GetZoneInfoCommand
 
 ## Responses
 
 ::: skydance.protocol.Response
 ::: skydance.protocol.GetNumberOfZonesResponse
-::: skydance.protocol.GetZoneNameResponse
+::: skydance.protocol.GetZoneInfoResponse

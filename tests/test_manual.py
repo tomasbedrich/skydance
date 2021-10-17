@@ -77,13 +77,13 @@ async def test_zone_discovery(state, session):
     number_of_zones = GetNumberOfZonesResponse(res).number
 
     for zone in range(1, number_of_zones + 1):
-        log.info("Getting name of zone=%d", zone)
-        cmd = GetZoneNameCommand(state, zone=zone).raw
+        log.info("Getting info about zone=%d", zone)
+        cmd = GetZoneInfoCommand(state, zone=zone).raw
         await session.write(cmd)
         state.increment_frame_number()
         res = await session.read(64)
-        zone_name = GetZoneNameResponse(res).name
-        log.info("Zone=%d has name=%s", zone, zone_name)
+        zone_info = GetZoneInfoResponse(res)
+        log.info("Zone=%d has type=%s, name=%s", zone, zone_info.type, zone_info.name)
 
 
 @pytest.mark.asyncio
