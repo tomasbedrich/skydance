@@ -1,3 +1,12 @@
+# 1.0.0 (2021-10-17)
+
+- Add support for RGBW commands.
+- Add zone type detection and parsing.
+
+**BREAKING CHANGES:**
+- `skydance.protocol.GetZoneNameCommand` renamed to `skydance.protocol.GetZoneInfoCommand`.
+- `skydance.protocol.GetZoneNameResponse` renamed to `skydance.protocol.GetZoneInfoResponse`.
+
 # 0.1.2 (2021-01-17)
 
 - Suppress network errors during session closing.
