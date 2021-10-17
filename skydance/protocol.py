@@ -2,6 +2,8 @@ import struct
 from abc import ABCMeta, abstractmethod
 from functools import partial
 
+from skydance.enum import ZoneType
+
 
 PORT = 8899
 """A port used for communication with a relay."""
@@ -81,7 +83,7 @@ class ZoneCommand(Command, metaclass=ABCMeta):
 
     def __init__(self, *args, zone: int, **kwargs):
         """
-        Create a .
+        Create a ZoneCommand.
 
         Args:
             *args: See [Command][skydance.protocol.Command].
@@ -255,6 +257,71 @@ class TemperatureCommand(ZoneCommand):
         )
 
 
+class RGBWCommand(ZoneCommand):
+    """Change color of a Zone."""
+
+    def __init__(self, *args, red: int, green: int, blue: int, white: int, **kwargs):
+        """
+        Create a RGBWCommand.
+
+        All component levels are between 0-255,
+        where higher number means more intensive color component.
+
+        At least one color component must be set to non-zero.
+
+        Args:
+            *args: See [ZoneCommand][skydance.protocol.ZoneCommand].
+            red: A red level.
+            green: A green level.
+            blue: A blue level.
+            white: A white level.
+            **kwargs: See [ZoneCommand][skydance.protocol.ZoneCommand].
+        """
+        super().__init__(*args, **kwargs)
+
+        self.validate_component(red, hint="red")
+        self.validate_component(green, hint="green")
+        self.validate_component(blue, hint="blue")
+        self.validate_component(white, hint="white")
+
+        if not red and not green and not blue and not white:
+            raise ValueError("At least one color component must be set to non-zero.")
+
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.white = white
+
+    @staticmethod
+    def validate_component(component: int, hint: str):
+        """
+        Validate a component level.
+
+        Raise:
+            ValueError: If component level is invalid.
+        """
+        try:
+            if not 0 <= component <= 255:
+                raise ValueError(f"Component level of {hint} must fit into one byte.")
+        except TypeError as e:
+            raise ValueError(f"Component level of {hint} must be int-like.") from e
+
+    @property
+    def body(self) -> bytes:
+        return bytes().join(
+            (
+                _COMMAND_MAGIC,
+                struct.pack("<H", 2 ** (self.zone - 1)),
+                bytes.fromhex("01 07 00"),
+                struct.pack("B", self.red),
+                struct.pack("B", self.green),
+                struct.pack("B", self.blue),
+                struct.pack("B", self.white),
+                bytes.fromhex("00 00 00"),
+            )
+        )
+
+
 class GetNumberOfZonesCommand(Command):
     """Get number of zones available."""
 
@@ -268,7 +335,7 @@ class GetNumberOfZonesCommand(Command):
         )
 
 
-class GetZoneNameCommand(ZoneCommand):
+class GetZoneInfoCommand(ZoneCommand):
     """Discover a zone according to it's number."""
 
     @property
@@ -347,16 +414,20 @@ class GetNumberOfZonesResponse(Response):
         return sum(1 for zone in self.body[12:28] if zone != 0)
 
 
-class GetZoneNameResponse(Response):
+class GetZoneInfoResponse(Response):
     """
-    Parse a response for `GetZoneNameCommand`.
+    Parse a response for `GetZoneInfoCommand`.
 
-    See: [`GetZoneNameCommand`][skydance.protocol.GetZoneNameCommand].
+    See: [`GetZoneInfoCommand`][skydance.protocol.GetZoneInfoCommand].
     """
 
-    # Name offset experimentally decoded from response packets.
+    @property
+    def type(self) -> ZoneType:
+        """Return a zone type."""
+        return ZoneType(self.body[12])
 
     @property
     def name(self) -> str:
         """Return a zone name."""
+        # Name offset experimentally decoded from response packets.
         return self.body[14:].decode("utf-8", errors="replace").strip(" \x00")

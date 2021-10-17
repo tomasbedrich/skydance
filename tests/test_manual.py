@@ -77,13 +77,13 @@ async def test_zone_discovery(state, session):
     number_of_zones = GetNumberOfZonesResponse(res).number
 
     for zone in range(1, number_of_zones + 1):
-        log.info("Getting name of zone=%d", zone)
-        cmd = GetZoneNameCommand(state, zone=zone).raw
+        log.info("Getting info about zone=%d", zone)
+        cmd = GetZoneInfoCommand(state, zone=zone).raw
         await session.write(cmd)
         state.increment_frame_number()
         res = await session.read(64)
-        zone_name = GetZoneNameResponse(res).name
-        log.info("Zone=%d has name=%s", zone, zone_name)
+        zone_info = GetZoneInfoResponse(res)
+        log.info("Zone=%d has type=%s, name=%s", zone, zone_info.type, zone_info.name)
 
 
 @pytest.mark.asyncio
@@ -133,6 +133,24 @@ async def test_on_blink_temp_off(state, session, zone: int):
     state.increment_frame_number()
     await asyncio.sleep(0.5)
     cmd = TemperatureCommand(state, zone=zone, temperature=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(2)
+
+    log.info("Starting RGBW change sequence")
+    cmd = RGBWCommand(state, zone=zone, red=255, green=0, blue=0, white=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(1)
+    cmd = RGBWCommand(state, zone=zone, red=0, green=255, blue=0, white=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(1)
+    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=255, white=0).raw
+    await session.write(cmd)
+    state.increment_frame_number()
+    await asyncio.sleep(1)
+    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=0, white=255).raw
     await session.write(cmd)
     state.increment_frame_number()
     await asyncio.sleep(2)
