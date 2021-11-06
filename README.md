@@ -2,6 +2,8 @@
 
 A library for communication with Skydance Wi-Fi relays.
 
+<a href="https://www.buymeacoffee.com/tomasbedrich" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 30px !important;width: 106px !important;" ></a>
+
 [![Build Status](https://img.shields.io/travis/tomasbedrich/skydance.svg)](https://travis-ci.org/tomasbedrich/skydance)
 [![Coverage Status](https://img.shields.io/coveralls/tomasbedrich/skydance.svg)](https://coveralls.io/r/tomasbedrich/skydance)
 [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/tomasbedrich/skydance.svg)](https://scrutinizer-ci.com/g/tomasbedrich/skydance)
