@@ -20,6 +20,7 @@ TAIL = bytes.fromhex("00 7e")
 # See: https://github.com/tomasbedrich/home-assistant-skydance/issues/1
 _COMMAND_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
 
+DEVICE_BASE_TYPE_NORMAL = 0x80
 
 class State:
     """Holds state of a connection."""
@@ -378,6 +379,31 @@ class Response(metaclass=ABCMeta):
         """
         self.raw = raw
 
+        lbody = self.body
+        li = 0
+
+        self.deviceType = lbody[li: li + 3]
+        li += 3
+
+        self.scrAddr = struct.unpack("<H", lbody[li: li + 2])[0]
+        li += 2
+
+        self.dstAddr = struct.unpack("<H", lbody[li: li + 2])[0]
+        li += 2 
+
+        self.zone = struct.unpack("<H", lbody[li: li + 2])[0]
+        li += 2
+
+        self.cmdType = struct.unpack("B", lbody[li: li + 1])[0] - DEVICE_BASE_TYPE_NORMAL
+        li += 1
+
+        cmdDataLenght = struct.unpack("<H", lbody[li: li + 2])[0]
+        li += 2
+
+        if cmdDataLenght > 0:
+            self.cmdData = lbody[li: li + cmdDataLenght]
+            li += cmdDataLenght
+
     @property
     def body(self) -> bytes:
         """
@@ -408,11 +434,23 @@ class GetNumberOfZonesResponse(Response):
     # - Zone name
     # - Zone status (on/off)
 
-    @property
-    def number(self):
-        """Return number of zones available."""
-        return sum(1 for zone in self.body[12:28] if zone != 0)
+    def __init__(self, raw: bytes):
+        super().__init__(raw)
+        self._zones = []
 
+        for lbyte in self.cmdData:
+            if (lbyte & DEVICE_BASE_TYPE_NORMAL) == DEVICE_BASE_TYPE_NORMAL:
+                zoneId = lbyte & 0x1f
+                self._zones.append(zoneId)
+
+
+    @property
+    def number(self) -> int:
+        return len(self._zones)
+
+    @property
+    def zones(self) -> list:
+        return self._zones
 
 class GetZoneInfoResponse(Response):
     """
@@ -424,10 +462,10 @@ class GetZoneInfoResponse(Response):
     @property
     def type(self) -> ZoneType:
         """Return a zone type."""
-        return ZoneType(self.body[12])
+        return ZoneType(self.cmdData[0])
 
     @property
     def name(self) -> str:
         """Return a zone name."""
         # Name offset experimentally decoded from response packets.
-        return self.body[14:].decode("utf-8", errors="replace").strip(" \x00")
+        return self.cmdData[2:].decode("utf-8", errors="replace").strip(" \x00")
