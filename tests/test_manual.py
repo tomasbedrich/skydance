@@ -67,7 +67,7 @@ async def test_state_frame_number_overflow(state, session):
 
 
 @pytest.mark.asyncio
-async def test_zone_discovery(state, session, caplog):
+async def test_zone_discovery(state, session):
     log.info("Getting number of zones")
     cmd = GetNumberOfZonesCommand(state).raw
     await session.write(cmd)

@@ -131,7 +131,7 @@ class PowerCommand(ZoneCommand):
             (
                 _COMMAND_MAGIC,
                 # TODO: zone number is probably a 2 byte bitmask of what zones to power on/off
-                struct.pack("<H", 2 ** (self.zone - 1)),
+                struct.pack("<H", 1 << (self.zone - 1)),
                 bytes.fromhex("0a 01 00"),
                 bytes.fromhex("01" if self.power else "00"),
             )
@@ -382,27 +382,27 @@ class Response(metaclass=ABCMeta):
         lbody = self.body
         li = 0
 
-        self.deviceType = lbody[li: li + 3]
+        self.device_type = lbody[li: li + 3]
         li += 3
 
-        self.scrAddr = struct.unpack("<H", lbody[li: li + 2])[0]
+        self.scr_addr = struct.unpack("<H", lbody[li: li + 2])[0]
         li += 2
 
-        self.dstAddr = struct.unpack("<H", lbody[li: li + 2])[0]
+        self.dst_addr = struct.unpack("<H", lbody[li: li + 2])[0]
         li += 2 
 
         self.zone = struct.unpack("<H", lbody[li: li + 2])[0]
         li += 2
 
-        self.cmdType = struct.unpack("B", lbody[li: li + 1])[0] - DEVICE_BASE_TYPE_NORMAL
+        self.cmd_type = struct.unpack("B", lbody[li: li + 1])[0] - DEVICE_BASE_TYPE_NORMAL
         li += 1
 
-        cmdDataLenght = struct.unpack("<H", lbody[li: li + 2])[0]
+        cmd_data_lenght = struct.unpack("<H", lbody[li: li + 2])[0]
         li += 2
 
-        if cmdDataLenght > 0:
-            self.cmdData = lbody[li: li + cmdDataLenght]
-            li += cmdDataLenght
+        if cmd_data_lenght > 0:
+            self.cmd_data = lbody[li: li + cmd_data_lenght]
+            li += cmd_data_lenght
 
     @property
     def body(self) -> bytes:
@@ -438,7 +438,7 @@ class GetNumberOfZonesResponse(Response):
         super().__init__(raw)
         self._zones = []
 
-        for lbyte in self.cmdData:
+        for lbyte in self.cmd_data:
             if (lbyte & DEVICE_BASE_TYPE_NORMAL) == DEVICE_BASE_TYPE_NORMAL:
                 zoneId = lbyte & 0x1f
                 self._zones.append(zoneId)
@@ -462,10 +462,10 @@ class GetZoneInfoResponse(Response):
     @property
     def type(self) -> ZoneType:
         """Return a zone type."""
-        return ZoneType(self.cmdData[0])
+        return ZoneType(self.cmd_data[0])
 
     @property
     def name(self) -> str:
         """Return a zone name."""
         # Name offset experimentally decoded from response packets.
-        return self.cmdData[2:].decode("utf-8", errors="replace").strip(" \x00")
+        return self.cmd_data[2:].decode("utf-8", errors="replace").strip(" \x00")
