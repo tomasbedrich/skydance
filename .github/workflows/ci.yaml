@@ -20,12 +20,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-
+      
       - name: Install Poetry
-        run: |
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-          source $HOME/.poetry/env
-          make doctor
+        uses: snok/install-poetry@v1
 
       - name: Cache dependencies
         uses: actions/cache@v2
