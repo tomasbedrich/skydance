@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skipif(
     "attached to the local network.",
 )
 
-IP = os.getenv("IP", default="192.168.2.30")
+IP = os.getenv("IP", default="192.168.88.113")
 IP_BROADCAST = "192.168.3.255"
 
 log = logging.getLogger(__name__)
@@ -74,9 +74,8 @@ async def test_zone_discovery(state, session):
     await session.write(cmd)
     state.increment_frame_number()
     res = await session.read(64)
-    number_of_zones = GetNumberOfZonesResponse(res).number
 
-    for zone in range(1, number_of_zones + 1):
+    for zone in GetNumberOfZonesResponse(res).zones:
         log.info("Getting info about zone=%d", zone)
         cmd = GetZoneInfoCommand(state, zone=zone).raw
         await session.write(cmd)
