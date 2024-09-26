@@ -385,7 +385,7 @@ class Response(metaclass=ABCMeta):
         self.device_type = lbody[li: li + 3]
         li += 3
 
-        self.scr_addr = struct.unpack("<H", lbody[li: li + 2])[0]
+        self.src_addr = struct.unpack("<H", lbody[li: li + 2])[0]
         li += 2
 
         self.dst_addr = struct.unpack("<H", lbody[li: li + 2])[0]
@@ -446,10 +446,12 @@ class GetNumberOfZonesResponse(Response):
 
     @property
     def number(self) -> int:
+    """Return number of zones available."""
         return len(self._zones)
 
     @property
     def zones(self) -> list:
+    """Return list of IDs of zones available."""
         return self._zones
 
 class GetZoneInfoResponse(Response):
