@@ -1,6 +1,6 @@
 # 1.0.1 (2024-09-27)
 
-- Fix parsing of `GetZoneInfoResponse` (see [#17](https://github.com/tomasbedrich/skydance/pull/17))
+- Fix parsing of `GetNumberOfZonesResponse` (see [#17](https://github.com/tomasbedrich/skydance/pull/17))
 
 # 1.0.0 (2021-10-17)
 
