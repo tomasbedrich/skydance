@@ -32,6 +32,7 @@ async def session_fixture():
     async with Session(IP, PORT) as session:
         yield session
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "chunk_size", range(1, 41)

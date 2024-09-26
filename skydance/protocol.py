@@ -22,6 +22,7 @@ _COMMAND_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
 
 DEVICE_BASE_TYPE_NORMAL = 0x80
 
+
 class State:
     """Holds state of a connection."""
 
@@ -382,26 +383,28 @@ class Response(metaclass=ABCMeta):
         lbody = self.body
         li = 0
 
-        self.device_type = lbody[li: li + 3]
+        self.device_type = lbody[li : li + 3]
         li += 3
 
-        self.src_addr = struct.unpack("<H", lbody[li: li + 2])[0]
+        self.src_addr = struct.unpack("<H", lbody[li : li + 2])[0]
         li += 2
 
-        self.dst_addr = struct.unpack("<H", lbody[li: li + 2])[0]
-        li += 2 
-
-        self.zone = struct.unpack("<H", lbody[li: li + 2])[0]
+        self.dst_addr = struct.unpack("<H", lbody[li : li + 2])[0]
         li += 2
 
-        self.cmd_type = struct.unpack("B", lbody[li: li + 1])[0] - DEVICE_BASE_TYPE_NORMAL
+        self.zone = struct.unpack("<H", lbody[li : li + 2])[0]
+        li += 2
+
+        self.cmd_type = (
+            struct.unpack("B", lbody[li : li + 1])[0] - DEVICE_BASE_TYPE_NORMAL
+        )
         li += 1
 
-        cmd_data_lenght = struct.unpack("<H", lbody[li: li + 2])[0]
+        cmd_data_lenght = struct.unpack("<H", lbody[li : li + 2])[0]
         li += 2
 
         if cmd_data_lenght > 0:
-            self.cmd_data = lbody[li: li + cmd_data_lenght]
+            self.cmd_data = lbody[li : li + cmd_data_lenght]
             li += cmd_data_lenght
 
     @property
@@ -440,19 +443,19 @@ class GetNumberOfZonesResponse(Response):
 
         for lbyte in self.cmd_data:
             if (lbyte & DEVICE_BASE_TYPE_NORMAL) == DEVICE_BASE_TYPE_NORMAL:
-                zoneId = lbyte & 0x1f
+                zoneId = lbyte & 0x1F
                 self._zones.append(zoneId)
-
 
     @property
     def number(self) -> int:
-    """Return number of zones available."""
+        """Return number of zones available."""
         return len(self._zones)
 
     @property
     def zones(self) -> list:
-    """Return list of IDs of zones available."""
+        """Return list of IDs of zones available."""
         return self._zones
+
 
 class GetZoneInfoResponse(Response):
     """
