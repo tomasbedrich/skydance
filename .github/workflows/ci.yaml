@@ -42,11 +42,3 @@ jobs:
 
       - name: Run tests
         run: make test
-
-      - name: Upload coverage to Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: |
-          pip install coveralls scrutinizer-ocular
-          coveralls
-          ocular
