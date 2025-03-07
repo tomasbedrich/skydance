@@ -25,7 +25,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
