@@ -17,7 +17,7 @@ This aim of this library is to roughly cover capabilities of [the official SkySm
 
 ## Requirements
 
-* Python 3.8+
+* Python 3.9+
 
 ## Installation
 
