@@ -1,7 +1,7 @@
-from pkg_resources import DistributionNotFound, get_distribution
+from importlib.metadata import PackageNotFoundError, version
 
 
 try:
-    __version__ = get_distribution("skydance").version
-except DistributionNotFound:
+    __version__ = version("skydance")
+except PackageNotFoundError:
     __version__ = "(local)"
