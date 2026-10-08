@@ -1,3 +1,8 @@
+# 2.0.0 (unreleased)
+
+- Replace deprecated `pkg_resources` with `importlib.metadata` to fix import on Python 3.14.
+- Drop Python 3.8 support.
+
 # 1.0.1 (2024-09-27)
 
 - Fix parsing of `GetNumberOfZonesResponse` (see [#17](https://github.com/tomasbedrich/skydance/pull/17))
