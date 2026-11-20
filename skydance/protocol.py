@@ -1,6 +1,7 @@
 import struct
 from abc import ABCMeta, abstractmethod
 from functools import partial
+from typing import Optional
 
 from skydance.enum import ZoneType
 
@@ -21,6 +22,25 @@ TAIL = bytes.fromhex("00 7e")
 _COMMAND_MAGIC = bytes.fromhex("80 00 80 e1 80 00 00")
 
 DEVICE_BASE_TYPE_NORMAL = 0x80
+
+FRAME_NUMBER_LENGTH = 1
+"""A length of the frame number field."""
+
+RESPONSE_HEADER_LENGTH = (
+    len(HEAD)  # magic header
+    + FRAME_NUMBER_LENGTH
+    + 3  # device type
+    + 2  # source address
+    + 2  # destination address
+    + 2  # zone
+    + 1  # command type
+    + 2  # payload length
+)
+"""A length of the fixed part of a response frame."""
+
+
+class FrameError(Exception):
+    """Raised when bytes received from a relay do not form a valid frame."""
 
 
 class State:
@@ -47,6 +67,15 @@ class State:
 
 class Command(metaclass=ABCMeta):
     """A base command."""
+
+    response_type: Optional[int] = None
+    """
+    Type of the response this command expects.
+
+    It is compared with `Response.cmd_type` to pair a reply with its request,
+    because the relay broadcasts replies to all connected clients. Commands
+    which do not expect a specific reply leave it unset.
+    """
 
     def __init__(self, state: State):
         """
@@ -76,6 +105,8 @@ class Command(metaclass=ABCMeta):
 
 class PingCommand(Command):
     """Ping a relay to raise a communication error if something is wrong."""
+
+    response_type = 0x79
 
     body = bytes.fromhex("80 00 80 e1 80 00 00 01 00 79 00 00")
 
@@ -114,6 +145,8 @@ class ZoneCommand(Command, metaclass=ABCMeta):
 class PowerCommand(ZoneCommand):
     """Power a Zone on/off."""
 
+    response_type = 0x0A
+
     def __init__(self, *args, power: bool, **kwargs):
         """
         Create a PowerCommand.
@@ -146,6 +179,10 @@ PowerOffCommand = partial(PowerCommand, power=False)
 class MasterPowerCommand(Command):
     """Power all zones on/off."""
 
+    # Response type is not set on purpose: unlike the other commands, this one
+    # was not verified against a real relay, so it is paired by the frame
+    # number only.
+
     def __init__(self, *args, power: bool, **kwargs):
         """
         Create a MasterPowerCommand.
@@ -177,6 +214,8 @@ MasterPowerOffCommand = partial(MasterPowerCommand, power=False)
 
 class BrightnessCommand(ZoneCommand):
     """Change brightness of a Zone."""
+
+    response_type = 0x07
 
     def __init__(self, *args, brightness: int, **kwargs):
         """
@@ -220,6 +259,8 @@ class BrightnessCommand(ZoneCommand):
 class TemperatureCommand(ZoneCommand):
     """Change white temperature of a Zone."""
 
+    response_type = 0x0D
+
     def __init__(self, *args, temperature: int, **kwargs):
         """
         Create a TemperatureCommand.
@@ -261,6 +302,8 @@ class TemperatureCommand(ZoneCommand):
 
 class RGBWCommand(ZoneCommand):
     """Change color of a Zone."""
+
+    response_type = 0x01
 
     def __init__(self, *args, red: int, green: int, blue: int, white: int, **kwargs):
         """
@@ -327,6 +370,8 @@ class RGBWCommand(ZoneCommand):
 class GetNumberOfZonesCommand(Command):
     """Get number of zones available."""
 
+    response_type = 0x79
+
     @property
     def body(self) -> bytes:
         return bytes().join(
@@ -339,6 +384,8 @@ class GetNumberOfZonesCommand(Command):
 
 class GetZoneInfoCommand(ZoneCommand):
     """Discover a zone according to it's number."""
+
+    response_type = 0x78
 
     @property
     def body(self) -> bytes:
@@ -368,6 +415,33 @@ class GetZoneInfoCommand(ZoneCommand):
             raise ValueError("Zone number must be int-like.") from e
 
 
+def frame_length(header: bytes) -> int:
+    """
+    Return a length of a response frame in bytes.
+
+    A length cannot be detected by searching for `TAIL`, because the same byte
+    sequence may also appear inside the payload (a zone name or a color
+    component can contain it). It is taken from the payload length field
+    instead.
+
+    Args:
+        header: First `RESPONSE_HEADER_LENGTH` bytes of a frame.
+
+    Raise:
+        FrameError: If the header is too short or does not start with `HEAD`.
+    """
+    if len(header) < RESPONSE_HEADER_LENGTH:
+        raise FrameError(
+            f"Frame header must be at least {RESPONSE_HEADER_LENGTH} bytes long, "
+            f"got {len(header)}."
+        )
+    if not header.startswith(HEAD):
+        raise FrameError(f"Frame does not start with {HEAD.hex(' ')}.")
+
+    (payload_length,) = struct.unpack("<H", header[-2:])
+    return RESPONSE_HEADER_LENGTH + payload_length + len(TAIL)
+
+
 class Response(metaclass=ABCMeta):
     """A base response."""
 
@@ -377,8 +451,25 @@ class Response(metaclass=ABCMeta):
 
         Args:
             raw: Raw bytes received as a response.
+
+        Raise:
+            FrameError: If the frame is malformed or its length does not
+                match the payload length field.
         """
         self.raw = raw
+
+        if len(raw) < RESPONSE_HEADER_LENGTH + len(TAIL):
+            raise FrameError(f"Frame is too short: {len(raw)} bytes.")
+        if not raw.startswith(HEAD):
+            raise FrameError(f"Frame does not start with {HEAD.hex(' ')}.")
+        if not raw.endswith(TAIL):
+            raise FrameError(f"Frame does not end with {TAIL.hex(' ')}.")
+        if frame_length(raw[:RESPONSE_HEADER_LENGTH]) != len(raw):
+            raise FrameError(
+                f"Frame length {len(raw)} does not match its payload " "length field."
+            )
+
+        self.frame_number = raw[len(HEAD)]
 
         lbody = self.body
         li = 0
@@ -403,9 +494,7 @@ class Response(metaclass=ABCMeta):
         cmd_data_lenght = struct.unpack("<H", lbody[li : li + 2])[0]
         li += 2
 
-        if cmd_data_lenght > 0:
-            self.cmd_data = lbody[li : li + cmd_data_lenght]
-            li += cmd_data_lenght
+        self.cmd_data = lbody[li : li + cmd_data_lenght]
 
     @property
     def body(self) -> bytes:
