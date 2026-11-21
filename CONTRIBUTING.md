@@ -19,9 +19,9 @@ $ uv run ruff check .
 
 # Release Tasks
 
-Bump `version` in `pyproject.toml`, update `CHANGELOG.md`, then:
+Bump `version` in `pyproject.toml`, update `CHANGELOG.md`, commit, then tag and push - the `Release` workflow publishes to PyPI via trusted publishing:
 
 ```text
-$ uv build
-$ uv publish
+$ git tag v<version>
+$ git push origin master v<version>
 ```
