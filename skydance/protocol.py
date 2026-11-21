@@ -466,7 +466,7 @@ class Response(metaclass=ABCMeta):
             raise FrameError(f"Frame does not end with {TAIL.hex(' ')}.")
         if frame_length(raw[:RESPONSE_HEADER_LENGTH]) != len(raw):
             raise FrameError(
-                f"Frame length {len(raw)} does not match its payload " "length field."
+                f"Frame length {len(raw)} does not match its payload length field."
             )
 
         self.frame_number = raw[len(HEAD)]

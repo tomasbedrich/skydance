@@ -1,3 +1,7 @@
+# Unreleased
+
+- Require Python 3.11+ (3.9 and 3.10 are end-of-life).
+
 # 3.0.0 (2026-11-21)
 
 **BREAKING CHANGES:**

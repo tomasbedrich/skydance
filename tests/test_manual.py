@@ -1,7 +1,8 @@
 import logging
 import os
-import pytest
 from functools import partial
+
+import pytest
 
 from skydance.network.discovery import discover_ips_by_mac
 from skydance.network.session import Session
@@ -20,7 +21,6 @@ IP_BROADCAST = "192.168.3.255"
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.asyncio
 @pytest.fixture(name="session")
 async def session_fixture():
     async with Session(IP, PORT) as session:

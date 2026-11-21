@@ -1,72 +1,27 @@
 # Setup
 
-## Requirements
-
-* Make:
-    * macOS: `$ xcode-select --install`
-    * Linux: [https://www.gnu.org/software/make](https://www.gnu.org/software/make)
-    * Windows: [https://mingw.org/download/installer](https://mingw.org/download/installer)
-* Python: `$ pyenv install`
-* Poetry: [https://poetry.eustace.io/docs/#installation](https://poetry.eustace.io/docs/#installation)
-
-To confirm these system dependencies are configured correctly:
+Install [uv](https://docs.astral.sh/uv/), then install the project with its dev dependencies:
 
 ```text
-$ make doctor
-```
-
-## Installation
-
-Install project dependencies into a virtual environment:
-
-```text
-$ make install
+$ uv sync
 ```
 
 # Development Tasks
 
-## Manual
-
-Run the tests:
-
 ```text
-$ make test
+$ uv run pytest
+$ uv run mypy skydance tests
+$ uv run ruff format .
+$ uv run ruff check .
 ```
 
-Run static analysis:
-
-```text
-$ make check
-```
-
-Build the documentation:
-
-```text
-$ make docs
-```
-
-## Automatic
-
-Keep all of the above tasks running on change:
-
-```text
-$ make watch
-```
-
-> In order to have OS X notifications, `brew install terminal-notifier`.
-
-# Continuous Integration
-
-The CI server will report overall build status:
-
-```text
-$ make ci
-```
+`tests/test_manual.py` needs a physical Wi-Fi relay on the local network (set `IP`). It is skipped when the `CI` environment variable is set.
 
 # Release Tasks
 
-Release to PyPI:
+Bump `version` in `pyproject.toml`, update `CHANGELOG.md`, then:
 
 ```text
-$ make upload
+$ uv build
+$ uv publish
 ```

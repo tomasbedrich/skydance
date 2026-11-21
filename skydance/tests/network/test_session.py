@@ -1,6 +1,7 @@
-import pytest
 import struct
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from skydance.network.session import Session
 from skydance.protocol import HEAD, TAIL, GetNumberOfZonesCommand, PingCommand
@@ -154,7 +155,7 @@ async def test_number_of_zones_reply(transport):
     """A real reply is parsed by the library responses."""
     reader, writer = transport
     reply = bytes.fromhex(
-        "55aa5aa57e00800080e180adff0100f91000" "0082838405060708090a0b0c0d0e0f10" "007e"
+        "55aa5aa57e00800080e180adff0100f910000082838405060708090a0b0c0d0e0f10007e"
     )
     reader.readexactly = AsyncMock(side_effect=[reply[:18], reply[18:]])
 
