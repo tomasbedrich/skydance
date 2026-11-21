@@ -10,19 +10,12 @@ pip-wheel-metadata/
 Icon*
 
 # Temporary virtual environment files
-/.cache/
 /.venv/
 
 # Temporary server files
 .env
 *.pid
 
-# Generated documentation
-/docs/gen/
-/docs/apidocs/
-/site/
-/*.html
-/docs/*.png
 
 # Google Drive
 *.gdoc
@@ -30,10 +23,10 @@ Icon*
 *.gslides
 *.gdraw
 
-# Testing and coverage results
-/.coverage
-/.coverage.*
-/htmlcov/
+# Testing results
+/.pytest_cache/
+/.mypy_cache/
+/.ruff_cache/
 
 # Build and release directories
 /build/
