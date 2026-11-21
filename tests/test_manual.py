@@ -1,9 +1,8 @@
-import asyncio
 import logging
 import os
 import pytest
+from functools import partial
 
-from skydance.network.buffer import Buffer
 from skydance.network.discovery import discover_ips_by_mac
 from skydance.network.session import Session
 from skydance.protocol import *
@@ -21,11 +20,6 @@ IP_BROADCAST = "192.168.3.255"
 log = logging.getLogger(__name__)
 
 
-@pytest.fixture(name="state")
-def state_fixture():
-    return State()
-
-
 @pytest.mark.asyncio
 @pytest.fixture(name="session")
 async def session_fixture():
@@ -34,132 +28,75 @@ async def session_fixture():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "chunk_size", range(1, 41)
-)  # GetNumberOfZonesResponse is expected to be 36 bytes long
-async def test_buffered_read(state, session, chunk_size):
-    buffer = Buffer(TAIL)
-
-    log.info("Testing buffered read with chunk_size=%d", chunk_size)
-    cmd = GetNumberOfZonesCommand(state).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-
-    # this is the code under test
-    while not buffer.is_message_ready:
-        chunk = await session.read(chunk_size)
-        buffer.feed(chunk)
-    res = buffer.get_message()
-
-    number_of_zones = GetNumberOfZonesResponse(res).number
-    log.info("Got number_of_zones=%d ", number_of_zones)
+async def test_number_of_zones(session):
+    raw = await session.request(GetNumberOfZonesCommand)
+    log.info("Got number_of_zones=%d", GetNumberOfZonesResponse(raw).number)
 
 
 @pytest.mark.asyncio
-async def test_state_frame_number_overflow(state, session):
+async def test_state_frame_number_overflow(session):
     log.info("Testing State.frame_number overflow")
     for _ in range(256):
-        cmd = GetNumberOfZonesCommand(state).raw
-        await session.write(cmd)
-        state.increment_frame_number()
-        res = await session.read(64)
-        number_of_zones = GetNumberOfZonesResponse(res).number
-        log.debug("Got number_of_zones=%d", number_of_zones)
+        raw = await session.request(GetNumberOfZonesCommand)
+        log.debug("Got number_of_zones=%d", GetNumberOfZonesResponse(raw).number)
 
 
 @pytest.mark.asyncio
-async def test_zone_discovery(state, session):
+async def test_zone_discovery(session):
     log.info("Getting number of zones")
-    cmd = GetNumberOfZonesCommand(state).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    res = await session.read(64)
+    raw = await session.request(GetNumberOfZonesCommand)
 
-    for zone in GetNumberOfZonesResponse(res).zones:
+    for zone in GetNumberOfZonesResponse(raw).zones:
         log.info("Getting info about zone=%d", zone)
-        cmd = GetZoneInfoCommand(state, zone=zone).raw
-        await session.write(cmd)
-        state.increment_frame_number()
-        res = await session.read(64)
-        zone_info = GetZoneInfoResponse(res)
+        raw = await session.request(partial(GetZoneInfoCommand, zone=zone))
+        zone_info = GetZoneInfoResponse(raw)
         log.info("Zone=%d has type=%s, name=%s", zone, zone_info.type, zone_info.name)
 
 
 @pytest.mark.asyncio
-async def test_ping(state, session):
+async def test_ping(session):
     log.info("Pinging")
-    cmd = PingCommand(state).raw
-    await session.write(cmd)
+    await session.request(PingCommand)
 
 
 @pytest.mark.asyncio
-async def test_master_on_off(state, session):
+async def test_master_on_off(session):
     log.info("Master on")
-    cmd = MasterPowerOnCommand(state).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    await session.request(MasterPowerOnCommand)
 
     log.info("Master off")
-    cmd = MasterPowerOffCommand(state).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    await session.request(MasterPowerOffCommand)
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("zone", {1, 2, 3})
-async def test_on_blink_temp_off(state, session, zone: int):
+async def test_on_blink_temp_off(session, zone: int):
     log.info("Powering on")
-    cmd = PowerOnCommand(state, zone=zone).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    await session.request(partial(PowerOnCommand, zone=zone))
 
     log.info("Starting blink sequence")
-    cmd = BrightnessCommand(state, zone=zone, brightness=1).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(0.5)
-    cmd = BrightnessCommand(state, zone=zone, brightness=255).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    await session.request(partial(BrightnessCommand, zone=zone, brightness=1))
+    await session.request(partial(BrightnessCommand, zone=zone, brightness=255))
 
     log.info("Starting white temperature change sequence")
-    cmd = TemperatureCommand(state, zone=zone, temperature=255).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(0.5)
-    cmd = TemperatureCommand(state, zone=zone, temperature=0).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    await session.request(partial(TemperatureCommand, zone=zone, temperature=255))
+    await session.request(partial(TemperatureCommand, zone=zone, temperature=0))
 
     log.info("Starting RGBW change sequence")
-    cmd = RGBWCommand(state, zone=zone, red=255, green=0, blue=0, white=0).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(1)
-    cmd = RGBWCommand(state, zone=zone, red=0, green=255, blue=0, white=0).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(1)
-    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=255, white=0).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(1)
-    cmd = RGBWCommand(state, zone=zone, red=0, green=0, blue=0, white=255).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    await asyncio.sleep(2)
+    for red, green, blue, white in (
+        (255, 0, 0, 0),
+        (0, 255, 0, 0),
+        (0, 0, 255, 0),
+        (0, 0, 0, 255),
+    ):
+        await session.request(
+            partial(
+                RGBWCommand, zone=zone, red=red, green=green, blue=blue, white=white
+            )
+        )
 
     log.info("Powering off")
-    cmd = PowerOffCommand(state, zone=zone).raw
-    await session.write(cmd)
-    state.increment_frame_number()
-    # note - zone max+1 means controlling all zones at once
-    await asyncio.sleep(0.25)
+    await session.request(partial(PowerOffCommand, zone=zone))
 
 
 @pytest.mark.asyncio

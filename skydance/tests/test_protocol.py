@@ -244,3 +244,97 @@ zone_info_params = {
 def test_get_zone_info_response_types(raw, expected_type):
     zone_info = GetZoneInfoResponse(raw)
     assert zone_info.type == expected_type
+
+
+def make_response(
+    frame_number: int = 0,
+    cmd_type: int = 0xF9,
+    payload: bytes = b"\x00" * 16,
+) -> bytes:
+    """Build a response frame the same way a relay does."""
+    return (
+        HEAD
+        + bytes([frame_number])
+        + bytes.fromhex("800080e180adff0100")
+        + bytes([cmd_type])
+        + struct.pack("<H", len(payload))
+        + payload
+        + TAIL
+    )
+
+
+def test_frame_length():
+    payload = b"\x00" * 16
+    frame = make_response(payload=payload)
+    assert frame_length(frame[:RESPONSE_HEADER_LENGTH]) == len(frame)
+    assert len(frame) == RESPONSE_HEADER_LENGTH + len(payload) + len(TAIL)
+
+
+def test_frame_length_short_header():
+    with pytest.raises(expected_exception=FrameError):
+        frame_length(HEAD)
+
+
+def test_frame_length_bad_head():
+    with pytest.raises(expected_exception=FrameError):
+        frame_length(b"\x00" * RESPONSE_HEADER_LENGTH)
+
+
+def test_response_frame_number():
+    frame = make_response(frame_number=42)
+    assert Response(frame).frame_number == 42
+
+
+def test_response_without_payload():
+    """A reply without a payload has empty `cmd_data` instead of no attribute."""
+    frame = make_response(cmd_type=0x8A, payload=b"")
+    response = Response(frame)
+    assert response.cmd_type == 0x0A
+    assert response.cmd_data == b""
+
+
+def test_response_tail_inside_payload():
+    """A payload may contain the tail sequence, the frame is not cut short."""
+    payload = bytes.fromhex("51005a6f6e65007e2054657374000000")
+    frame = make_response(payload=payload)
+    response = GetZoneInfoResponse(frame)
+    assert response.cmd_data == payload
+
+
+@pytest.mark.parametrize(
+    "cmd_type, command",
+    [
+        (0xF9, PingCommand),
+        (0xF9, GetNumberOfZonesCommand),
+        (0xF8, GetZoneInfoCommand),
+        (0x8A, PowerCommand),
+        (0x87, BrightnessCommand),
+        (0x8D, TemperatureCommand),
+        (0x81, RGBWCommand),
+    ],
+)
+def test_response_type_declared_by_command(cmd_type, command):
+    """Replies are paired with their requests by the declared command type."""
+    response = Response(make_response(cmd_type=cmd_type))
+    assert response.cmd_type == command.response_type
+
+
+@pytest.mark.parametrize(
+    "frame",
+    [
+        b"",
+        bytes.fromhex("55aa5aa57e00"),
+        make_response()[:-1],
+        make_response()[:RESPONSE_HEADER_LENGTH],
+    ],
+)
+def test_response_malformed(frame):
+    with pytest.raises(expected_exception=FrameError):
+        Response(frame)
+
+
+def test_response_length_mismatch():
+    frame = make_response()
+    broken = frame[:16] + struct.pack("<H", 32) + frame[18:]
+    with pytest.raises(expected_exception=FrameError):
+        Response(broken)

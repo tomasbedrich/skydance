@@ -1,3 +1,27 @@
+# 3.0.0 (unreleased)
+
+**BREAKING CHANGES:**
+
+- `Session.read()` and `Session.write()` are replaced by `Session.request()`,
+  which sends a command and returns its reply frame. The frame number is now
+  handled by the session, so callers do not have to increment it themselves.
+
+Other changes:
+
+- Frame replies by the payload length field instead of the `TAIL` sequence,
+  which may also appear inside a payload (e.g. in a zone name or in a color
+  component), and raise `skydance.protocol.FrameError` on a malformed or
+  inconsistent frame instead of a `struct.error` or an `AttributeError`.
+- Pair a reply with its request by the frame number and the command type, so
+  that a reply broadcast to another client is not mistaken for ours. Commands
+  declare the expected reply type in `Command.response_type`.
+- `Response` exposes `frame_number` and always provides `cmd_data` (an empty
+  `bytes` when there is no payload).
+- Bound every request with a timeout, retry it once on a fresh connection, and
+  fail fast when the relay is not reachable at all.
+- Pace commands: at least `Session.PAUSE_BETWEEN_COMMANDS` seconds pass between
+  two commands, as the relay cannot handle them faster.
+
 # 2.0.0 (2026-10-08)
 
 - Replace deprecated `pkg_resources` with `importlib.metadata` to fix import on Python 3.14.
